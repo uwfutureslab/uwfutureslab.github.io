@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>DesignHuddle</title>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <script src="libraries/p5.min.js"></script>
+    <script src="libraries/p5.sound.min.js"></script>
+    <script src="libraries/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Playwrite+US+Modern&display=swap" rel="stylesheet">
+   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div style="touch-action: none;" id="p5sketch"><script src="sketch.js"></script></div>
+    <noscript>
+      <h1>Futures Lab: An AI+UX Prototyping Workshop</h1>
+      <p>Fall 2025: "Learning Re-Imagined"</p>
+    </noscript>
+    <div id="maincontent">
+      <p>Sponsored by Google and led by Prof. Edith Law at University of Waterloo, Futures Lab is an AI+UX prototyping workshop that engages university students from all disciplines to explore AI-empowered technology for the <strong>Future of Work and Learning</strong>. For Fall 2025, the theme is “Learning Re-Imagined”.</p>
+      <p>In the “Learning Re-Imagined” Futures Lab, students will work in interdisciplinary teams over 8 weeks to conceptualize new types of learning tools &ndash; to help students acquire domain knowledge (e.g., concepts in chemistry), practice procedural skills (e.g., language learning), or develop certain disposition for learning (e.g., self-management, intercultural effectiveness, curiosity).  Students will learn how to prototype using <a href="https://gemini.google/overview/canvas/?hl=en">Gemini Canvas</a> to prototype learning tools for themselves or for others. As an example, one of the creative technologists from Google prototyped <a href="https://labs.google/lll/en">Little Language Lessons</a> using Gemini to <a href="https://developers.googleblog.com/en/how-its-made-little-language-lessons-to-personalize-learning/">personalize language learning.</a></p>
+      <p>In parallel, this workshop will cultivate the essential skills required to live and lead in an AI-driven world. Students will move beyond being passive users and become critical, discerning architects of their interactions with AI. This includes developing proficiency in prompt engineering, learning to rigorously test and validate AI outputs, critically examining AI-generated information for potential biases and inaccuracies, and thinking about the broader implications of AI technology and its adoption.</p>
+      <h3>Students will:</h3>
+      <ul>
+        <li>learn to prototype with cutting-edge GenAI tools and latest industry methods</li>
+        <li>apply innovative problem solving to real-life, societal challenges</li>
+        <li>collaborate in interdisciplinary teams to meet the needs of stakeholders</li>
+        <li>develop solutions to augment their portfolio</li>
+        <li>have the opportunity to further develop their project after the workshop, via research, open-source project or a new venture</li>
+        <li>receive a certificate of completion</li>
+      </ul>
+      <div class="nospace">
+        <p><strong>When:</strong> Oct 6, 2025 - Nov 24, 2025, Mondays 4:30pm-6:30pm</p>
+        <p><strong>Where:</strong> Learning Lab @ Dana Porter Library, and other locations (e.g., Catalyst, Google, etc)</p>
+      </div>
+      <p><strong>Eligibility:</strong>  We are looking for undergraduate students (3A and above) and graduate students from all disciplines who have bold ideas about what the future of learning should look like.  Technical and design skills are desirable, but not required.</p>
+      <p><strong>Teams:</strong> There will be roughly 12 teams, and each student team will consist of 2-3 students ideally from diverse backgrounds, with at least 1 student with technical (e.g., programming) and/or design (e.g., UX, Figma) skills.</p>
+      <p><strong>Program Outcomes and Expectations:</strong> As a requirement for participating in the program, students need to agree to <a href="https://docs.google.com/document/d/1Ll4auZ7NZKsET3Ra2i5QS4FSerZVbHfG40hdL0H_TwY/edit?usp=sharing">Google's terms and conditions</a>.  Students are expected to attend all weekly sessions, with only one excused absence allowed.</p>
+      <p><strong>Application Instructions:</strong> To be considered for this program, students must (1) submit an application via this <a href="https://docs.google.com/forms/d/e/1FAIpQLSdhSZEMSvtmJEVedZfW4rucZJqfWh2BRC_908A44gRQQAHTQw/viewform?usp=preview">form</a>, and (2) upload a transcript, resume and one reference letter (optional, but highly encouraged) by <strong>August 15, 2025</strong>.  The applications will be reviewed by a joint Google-UWaterloo committee, and students will be notified of the results by email in early September.</p>
+      <div id="schedule">
+        <h2>Schedule</h2>
+        <div class="schedule-item">
+          <h3 class="green">Week 1</h3>
+          <ul>
+            <li><strong>Workshop Overview</strong></li>
+            <li><strong>Gemini Canvas:</strong> Introduction to AI prototyping tools (by Google Creative Technologies Team)</li>
+            <li><strong>Prototype your Learning:</strong> students individually practice building a prototype using Gemini Canvas</li>
+            <li><strong>Team Formation and Brainstorming:</strong> students form teams and start brainstorming a learning problem and potential solutions </li>
+          </ul>
+        </div>
+        <div class="schedule-item">
+          <h3 class="blue">Week 2</h3>
+          <ul>
+            <li><strong>80 to 100:</strong> the use of AI for ideation, research, synthesis, composition, simulation & self reflection / assessment</li>
+            <li><strong>Initial Prototype and Problem Statement:</strong> Student teams work on initial prototype and create “problem statement” presentation</li>
+          </ul>
+        </div>
+        <div class="schedule-item">
+          <h3 class="yellow">Week 3</h3>
+          <ul>
+            <li><strong>Problem Statement Presentation:</strong> Student teams present problem statement and initial prototype idea</li>
+          </ul>
+        </div>
+        <div class="schedule-item">
+          <h3 class="red">Week 4</h3>
+          <ul>
+            <li><strong>Prototype meet Reality:</strong> student teams are asked to invite 1-2 target user(s) to the workshop to try out their prototype and get feedback. Student teams will present these feedback towards the end of the session.</li>
+          </ul>
+        </div>
+        <div class="schedule-item">
+          <h3 class="green">Week 5</h3>
+          <ul>
+            <li><strong>Prototype Refinement:</strong> based on user and class feedback, student teams work on improving their prototype. </li>
+            <li><strong>Google Mentor Office Hour:</strong> student teams schedule a meeting with a Google mentor to discuss project directions</li>
+          </ul>
+        </div>
+        <div class="schedule-item">
+          <h3 class="blue">Week 6</h3>
+          <ul>
+            <li><strong>Evaluation Plan:</strong> student teams come up with an evaluation plan that will help them determine whether their learning tool will bring real value.  Student teams will present this evaluation plan towards the end of the session.</li>
+          </ul>
+        </div>
+        <div class="schedule-item">
+          <h3 class="yellow">Week 7</h3>
+          <ul>
+            <li><strong>Testing and Symposium Preparation:</strong> student teams will test each other's prototypes, refine design and prepare for the final demo/poster presentation.</li>
+          </ul>
+        </div>
+        <div class="schedule-item">
+          <h3 class="red">Week 8</h3>
+          <ul>
+            <li><strong>Google-UWaterloo Symposium on the "Future of Learning":</strong> student teams will present a demo and a poster at a public symposium, with guest judges from Google.  Prizes will be awarded to the top 3 most innovative projects.  </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
