@@ -1,7 +1,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #FAFAFA;
+  background-color: #212529;
 }
 
 canvas {
@@ -13,6 +13,7 @@ noscript > * {
 }
 
 h1, h2, h3, h4 {
+  color: #DEE2E6;
   font-family: "Playwrite US Modern", cursive;
   font-optical-sizing: auto;
   font-weight: 400;
@@ -20,6 +21,7 @@ h1, h2, h3, h4 {
 }
 
 p, a, li {
+  color: #DEE2E6;
   font-family: "Noto Sans", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
@@ -28,9 +30,9 @@ p, a, li {
 
 ul { list-style-type: square }
 
-a { color: #4285F4; }
+a { color: #4796E3; }
 
-a:visited { color: #0F9D58; }
+a:visited { color: #9177C7; }
 
 .nospace p{
   margin: 0;
@@ -40,8 +42,17 @@ a:visited { color: #0F9D58; }
   padding: 1em 2em 0em 2em;
 }
 
-#schedule h2 {
-  margin-bottom: 0;
+button {
+  background-color: #495057;
+  color: #DEE2E6;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #4796E3 0%, #9177C7 50%, #CA6673 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
 }
 
 .schedule-item {
@@ -49,6 +60,7 @@ a:visited { color: #0F9D58; }
   flex-direction: row;
   align-items: center;
   padding-bottom: 1rem;
+  gap: 1rem;
 }
 
 .schedule-item > h3 {
@@ -57,7 +69,6 @@ a:visited { color: #0F9D58; }
   padding: 2rem 1rem;
 }
 
-.blue { background-color: #4285F4; }
-.green { background-color: #0F9D58; }
-.red { background-color: #DB4437; }
-.yellow { background-color: #F4B400; }
+.blue { background-color: #4796E3; color: #000; }
+.red { background-color: #CA6673; color: #000; }
+.purple { background-color: #9177C7; color: #000; }

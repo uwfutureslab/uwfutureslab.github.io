@@ -2,7 +2,7 @@ let heroHeader, heroCaption, heroButton
 let mobile
 
 let stickies, stickySize, activeSticky
-const stickyColours = ['#0F9D58', '#4285F4', '#DB4437', '#F4B400']
+const stickyColours = ['#4796E3', '#9177C7', '#CA6673']
 const stickyText = [':)', 'hello world!', '~(o_o)~', '<(-_-)>']
 
 function setup() {
@@ -11,7 +11,7 @@ function setup() {
 
   mobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent)
 
-  heroHeader = createElement('h1', 'Futures Lab: An AI+UX Prototyping Workshop')
+  heroHeader = createElement('h1', '<span class="gradient-text">Futures Lab:</span> An AI+UX Prototyping Workshop')
   heroHeader.parent("p5sketch")
   heroCaption = createP('Fall 2025: "Learning Re-Imagined"')
   heroCaption.parent("p5sketch")
@@ -23,7 +23,6 @@ function setup() {
   stickies.push(new Sticky(stickyColours[0], random(stickyText)))
   stickies.push(new Sticky(stickyColours[1], random(stickyText)))
   stickies.push(new Sticky(stickyColours[2], random(stickyText)))
-  stickies.push(new Sticky(stickyColours[3], random(stickyText)))
   activeSticky = false
 
   heroButton.mousePressed(() => stickies.push(new Sticky(random(stickyColours), random(stickyText))))
@@ -31,10 +30,10 @@ function setup() {
 
 function draw() {
   // do background things
-  background(250);
+  background('#212529');
   push()
   noStroke()
-  fill('#E9EFF1')
+  fill('#495057')
   for (let y = 10; y < height; y += 20) {
     for (let x = 10; x < width; x += 20) {
       circle(x, y, 5)
@@ -56,7 +55,7 @@ function draw() {
   heroHeader.style('font-weight', '400')
   heroHeader.style('font-size', mobile ? '2em' : '3em')
   heroHeader.style('background-clip', 'content-box')
-  heroHeader.style('background-color', '#FAFAFA66')
+  heroHeader.style('background-color', '#49505766')
   heroHeader.position(0, (height / 2) - (heroHeader.size()['height'] * 2/3))
 
   heroCaption.style('padding-left', `${width / 6}px`)
@@ -64,7 +63,7 @@ function draw() {
   heroCaption.style('font-family', '"Noto Sans", sans-serif')
   heroCaption.style('font-size', mobile ? '1.5em' : '2em')
   heroCaption.style('background-clip', 'content-box')
-  heroCaption.style('background-color', '#FAFAFA66')
+  heroCaption.style('background-color', '#49505766')
   heroCaption.position(1, (height / 2) + (heroHeader.size()['height'] / 2))
 
   heroButton.style('padding', mobile ? '1em' : '1.5em')
