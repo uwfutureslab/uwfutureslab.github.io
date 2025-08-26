@@ -1,7 +1,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #212529;
+  background-color: #FFFFFF;
 }
 
 canvas {
@@ -13,7 +13,7 @@ noscript > * {
 }
 
 h1, h2, h3, h4 {
-  color: #DEE2E6;
+  color: #212529;
   font-family: "Playwrite US Modern", cursive;
   font-optical-sizing: auto;
   font-weight: 400;
@@ -21,7 +21,7 @@ h1, h2, h3, h4 {
 }
 
 p, a, li {
-  color: #DEE2E6;
+  color: #212529;
   font-family: "Noto Sans", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
@@ -43,8 +43,8 @@ a:visited { color: #9177C7; }
 }
 
 button {
-  background-color: #495057;
-  color: #DEE2E6;
+  background-color: #DEE2E6;
+  color: #212529;
 }
 
 .gradient-text {

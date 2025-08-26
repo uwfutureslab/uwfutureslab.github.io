@@ -30,10 +30,10 @@ function setup() {
 
 function draw() {
   // do background things
-  background('#212529');
+  background('#FFFFFF');
   push()
   noStroke()
-  fill('#495057')
+  fill('#E9ECEF')
   for (let y = 10; y < height; y += 20) {
     for (let x = 10; x < width; x += 20) {
       circle(x, y, 5)
@@ -55,7 +55,7 @@ function draw() {
   heroHeader.style('font-weight', '400')
   heroHeader.style('font-size', mobile ? '2em' : '3em')
   heroHeader.style('background-clip', 'content-box')
-  heroHeader.style('background-color', '#49505766')
+  heroHeader.style('background-color', '#DEE2E666')
   heroHeader.position(0, (height / 2) - (heroHeader.size()['height'] * 2/3))
 
   heroCaption.style('padding-left', `${width / 6}px`)
@@ -63,7 +63,7 @@ function draw() {
   heroCaption.style('font-family', '"Noto Sans", sans-serif')
   heroCaption.style('font-size', mobile ? '1.5em' : '2em')
   heroCaption.style('background-clip', 'content-box')
-  heroCaption.style('background-color', '#49505766')
+  heroCaption.style('background-color', '#DEE2E666')
   heroCaption.position(1, (height / 2) + (heroHeader.size()['height'] / 2))
 
   heroButton.style('padding', mobile ? '1em' : '1.5em')
