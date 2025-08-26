@@ -7,7 +7,7 @@ const stickyColours = ['#4796E3', '#9177C7', '#CA6673']
 const stickyText = [':)', 'hello world!', '~(o_o)~', '<(-_-)>']
 
 function setup() {
-  heightMod = 3/8
+  heightMod = 2/3
 
   c = createCanvas(windowWidth, windowHeight * heightMod);
   c.parent("p5sketch");
