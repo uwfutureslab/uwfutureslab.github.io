@@ -1,12 +1,15 @@
 let heroHeader, heroCaption, heroButton
 let mobile
+let heightMod
 
 let stickies, stickySize, activeSticky
 const stickyColours = ['#4796E3', '#9177C7', '#CA6673']
 const stickyText = [':)', 'hello world!', '~(o_o)~', '<(-_-)>']
 
 function setup() {
-  c = createCanvas(windowWidth, windowHeight * 2/3);
+  heightMod = 3/8
+
+  c = createCanvas(windowWidth, windowHeight * heightMod);
   c.parent("p5sketch");
 
   mobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent)
@@ -75,7 +78,7 @@ function draw() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight * 2/3)
+  resizeCanvas(windowWidth, windowHeight * heightMod)
   stickySize = min(height, width) / 8
 }
 
