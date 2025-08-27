@@ -7,6 +7,10 @@ html, body {
   align-items: center;
 }
 
+body {
+  padding-bottom: 4rem;
+}
+
 canvas {
   display: block;
 }

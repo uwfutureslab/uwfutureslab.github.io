@@ -13,6 +13,10 @@ function setup() {
   c.parent("p5sketch");
 
   mobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent)
+  if (mobile) {
+    scheduleItems = document.getElementsByClassName('schedule-item')
+    scheduleItems.forEach(e => e.style.flexDirection = 'column')
+  }
 
   heroHeader = createElement('h1', '<span class="gradient-text">Futures Lab:</span> An AI+UX Prototyping Workshop')
   heroHeader.parent("p5sketch")
