@@ -79,3 +79,29 @@ button {
 .blue { background-color: #4796E3; color: #000; }
 .red { background-color: #CA6673; color: #000; }
 .purple { background-color: #9177C7; color: #000; }
+.green { background-color: #77c783; color: #000 }
+
+.symposium {
+  font-family: "Space Grotesk", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.bq {
+  border-width: 0 0 0 0.25em;
+  border-style: solid;
+  padding-left: 0.5em;
+}
+.bb {
+  border-color: #4796E3;
+}
+.br {
+  border-color: #CA6673;
+}
+.bp {
+  border-color: #9177C7;
+}
+.bg {
+  border-color: #77c783;
+}
