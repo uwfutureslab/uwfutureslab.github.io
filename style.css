@@ -243,4 +243,7 @@ button {
   .schedule-item {
     flex-direction: column;
   }
+  .nav-element:hover > .nav-hover, .nav-element:hover > .symp-hover{
+    display: none;
+  }
 }
