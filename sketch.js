@@ -18,10 +18,10 @@ function setup() {
     scheduleItems.forEach(e => e.style.flexDirection = 'column')
   }
 
-  heroHeader = createElement('h1', '<span class="gradient-text">Futures Lab:</span> An AI+UX Prototyping Workshop')
+  heroHeader = createElement('h1', '<span class="gradient-text">Futures Lab:</span> An AI+UX Prototyping Workshop Series')
   heroHeader.parent("p5sketch")
-  heroCaption = createP('Fall 2025: "Learning Re-Imagined"')
-  heroCaption.parent("p5sketch")
+  //heroCaption = createP('Fall 2025: "Learning Re-Imagined"')
+  //heroCaption.parent("p5sketch")
   heroButton = createButton('add note')
   heroButton.parent("p5sketch")
 
@@ -64,7 +64,7 @@ function draw() {
   heroHeader.style('background-clip', 'content-box')
   heroHeader.style('background-color', '#DEE2E666')
   heroHeader.position(0, (height / 2) - (heroHeader.size()['height'] * 2/3))
-
+  /*
   heroCaption.style('padding-left', `${width / 6}px`)
   heroCaption.style('padding-right', `${width / 6}px`)
   heroCaption.style('font-family', '"Noto Sans", sans-serif')
@@ -72,7 +72,7 @@ function draw() {
   heroCaption.style('background-clip', 'content-box')
   heroCaption.style('background-color', '#DEE2E666')
   heroCaption.position(1, (height / 2) + (heroHeader.size()['height'] / 2))
-
+  */
   heroButton.style('padding', mobile ? '1em' : '1.5em')
   heroButton.style('font-family', '"Noto Sans", sans-serif')
   heroButton.style('font-size', mobile ? '0.5em' : '0.75em')

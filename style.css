@@ -19,6 +19,92 @@ noscript > * {
   padding: 0rem 2rem;
 }
 
+nav {
+ width: 80%;
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+ justify-content: space-between;
+ box-sizing: border-box
+}
+
+.title {
+  color: #212529;
+  font-family: "Playwrite US Modern", cursive;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.dropdowns {
+  display: flex;
+  flex-direction: row;
+}
+
+.nav-element {
+  padding: 1rem 2rem;
+  background-color: #FFFFFF;
+  position: relative;
+}
+
+.nav-element:hover {
+  background-color: #DEE2E666;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-element > a, .nav-hover > a, .symp-hover > a {
+  text-decoration: none;
+  color: #212529;
+}
+.nav-element > a:visited, .nav-hover > a:visited, .symp-hover > a:visited {
+  color: #212529;
+}
+
+.nav-element:hover > .nav-hover, .nav-element:hover > .symp-hover{
+  display: flex;
+}
+
+.nav-hover, .symp-hover {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0rem;
+  background-color: #FFFFFF;
+  position: absolute;
+  left: 0rem;
+  top: 105%;
+  z-index: 10;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+.nav-front {
+  background-color: #DEE2E666;
+}
+
+.nav-hover > a, .symp-hover > a {
+  padding: 0rem 2rem;
+}
+
+.symp-hover > a:hover {
+  background-color: #DEE2E666;
+  border-width: 0 0 0 0.25em;
+  border-style: solid;
+}
+
+.nav-hover > a:hover {
+  background: linear-gradient(90deg, #4796E3 0%, #9177C7 50%, #CA6673 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.nav-hover > a:hover::after {
+  content: '';
+  display: block;
+  height: 2px;
+  background: linear-gradient(90deg, #4796E3 0%, #9177C7 50%, #CA6673 100%);
+}
+
 h1, h2, h3, h4 {
   color: #212529;
   font-family: "Playwrite US Modern", cursive;
@@ -33,6 +119,15 @@ p, a, li {
   font-optical-sizing: auto;
   font-style: normal;
   font-size: 1.125rem;
+}
+
+p.symposium {
+  font-size: 1.25rem;
+}
+
+.heading-bg {
+  background-color: #DEE2E666;
+  display: inline-block;
 }
 
 ul { list-style-type: square }
@@ -104,4 +199,48 @@ button {
 }
 .bg {
   border-color: #77c783;
+}
+
+.offerings-link > h3 {
+  text-decoration: dotted;
+  background-color: #DEE2E666;
+  display: inline-block;
+}
+.offerings-link:hover > h3 {
+  background: linear-gradient(90deg, #4796E3 0%, #9177C7 50%, #CA6673 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.symposium-link > h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  text-decoration: none;
+  background-color: #DEE2E666;
+  display: inline-block;
+}
+.symposium-link:hover > h2 {
+  background-color: #DEE2E666;
+  border-width: 0 0 0 0.25em;
+  border-style: solid;
+  padding-left: 0.5em;
+}
+
+@media only screen and (max-width: 768px) {
+  nav {
+    width: 80%;
+  }
+  .dropdowns {
+    gap: 1rem;
+  }
+  .nav-element {
+    padding: 1rem 0rem;
+  }
+  .schedule-item {
+    flex-direction: column;
+  }
 }
