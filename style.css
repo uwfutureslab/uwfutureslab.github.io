@@ -113,6 +113,10 @@ h1, h2, h3, h4 {
   font-style: normal;
 }
 
+h2 {
+  padding-top: 20px;
+}
+
 p, a, li {
   color: #212529;
   font-family: "Noto Sans", sans-serif;
