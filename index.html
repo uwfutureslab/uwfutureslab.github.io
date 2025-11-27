@@ -10,6 +10,7 @@
     <script src="libraries/p5.min.js"></script>
     <script src="libraries/p5.sound.min.js"></script>
     <script src="libraries/gsap.min.js"></script>
+    <script src="/script.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Playwrite+US+Modern&display=swap" rel="stylesheet">
@@ -32,6 +33,13 @@
             <a href="/symposium/f25/">Fall 2025</a>
             <!--a href="/symposium/w26/">winter 2026</a-->
           </div>
+        </div>
+      </div>
+      <div id="menu">
+        <button onclick="handleMenu()"><p id="menu-icon">☰</p></button>
+        <div id="menu-dropdown" style="display: none;">
+          <a href="/offerings/f25/">Fall 2025 Workshop</a>
+          <a href="/symposium/f25/">Fall 2025 Symposium</a>
         </div>
       </div>
     </nav>
