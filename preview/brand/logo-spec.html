@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futures Lab — Logo (Prompt → Product)</title>
+<style>
+  :root{
+    /* Google brand colors */
+    --g-blue:#4285F4;
+    --g-red:#EA4335;
+    --g-yellow:#FBBC05;
+    --g-green:#34A853;
+    /* dark terminal surface */
+    --bg:#0B0F14;
+    --panel:#141A22;
+    --panel-2:#0F141B;
+    --border:#232B36;
+    --ink:#E7ECF3;
+    --muted:#8B95A7;
+    /* type */
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: "Google Sans", ui-sans-serif, system-ui, Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+  section{padding:64px 0;border-top:1px solid var(--border)}
+  section:first-of-type{border-top:0}
+  h2{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 24px}
+  h3{font-family:var(--sans);font-weight:600;margin:0 0 8px}
+  p{color:#C4CCD8}
+  .lead{color:var(--muted);max-width:64ch}
+  code.k{font-family:var(--mono);background:#0f151d;border:1px solid var(--border);padding:1px 6px;border-radius:5px;color:#cdd6e3;font-size:.92em}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    text-align:center;
+    padding:96px 24px 84px;
+    background:
+      radial-gradient(1200px 400px at 50% -10%, rgba(66,133,244,.14), transparent 60%),
+      radial-gradient(900px 500px at 50% 120%, rgba(52,168,83,.07), transparent 60%);
+  }
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:34px}
+
+  /* terminal window that holds the animated mark */
+  .term-window{
+    display:inline-block;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:30px 56px 30px 44px;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.03);
+    min-width:min(560px,86vw);
+  }
+  .dots{display:flex;gap:8px;margin-bottom:24px}
+  .dots i{width:11px;height:11px;border-radius:50%;display:block;opacity:.9}
+  .dots i:nth-child(1){background:var(--g-red)}
+  .dots i:nth-child(2){background:var(--g-yellow)}
+  .dots i:nth-child(3){background:var(--g-green)}
+
+  /* the animated prompt line */
+  .term{
+    font-family:var(--mono);
+    font-size:clamp(26px,5.4vw,52px);
+    font-weight:600;
+    letter-spacing:.005em;
+    color:var(--ink);
+    display:inline-flex;
+    align-items:center;
+    gap:.14em;
+    white-space:nowrap;
+    text-align:left;
+    transition:opacity .42s ease;
+  }
+  .chev{color:var(--g-blue);font-weight:700}
+  .typed{white-space:pre}
+  .slot{position:relative;display:inline-block;width:1.15em;height:1.15em}
+  .cursor{
+    position:absolute;left:.03em;bottom:.26em;
+    width:.52em;height:.14em;
+    background:var(--g-blue);
+    border-radius:3px;
+    transition:opacity .12s ease;
+    box-shadow:0 0 10px rgba(66,133,244,.5);
+  }
+  .spark{
+    position:absolute;left:50%;top:50%;
+    width:100%;height:100%;
+    transform:translate(-50%,-50%) scale(.1) rotate(-40deg);
+    transform-origin:center;
+    opacity:0;
+    transition:transform .5s cubic-bezier(.18,.85,.25,1),opacity .34s ease;
+    pointer-events:none;
+  }
+  .spark svg{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 16px rgba(66,133,244,.35))}
+  .term.bloomed .cursor{opacity:0}
+  .term.bloomed .spark{
+    transform:translate(-50%,-50%) scale(1) rotate(0);
+    opacity:1;
+    animation:twinkle 2.6s ease-in-out .35s infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{transform:translate(-50%,-50%) scale(1) rotate(0)}
+    50%{transform:translate(-50%,-50%) scale(1.09) rotate(9deg)}
+  }
+  .term.resetting{opacity:0}
+
+  .hero-word{margin-top:40px}
+  .hero-word .name{font-size:34px;font-weight:700;letter-spacing:-.02em}
+  .hero-word .co{font-family:var(--mono);font-size:13px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-top:8px}
+  .tag{margin-top:26px;color:var(--muted);font-size:15px}
+  .tag b{color:#cdd6e3;font-weight:600}
+
+  /* ---------- REST STATE / CONTEXTS ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}
+  .card{border:1px solid var(--border);border-radius:16px;padding:26px;display:flex;flex-direction:column;align-items:center;gap:16px;justify-content:center;min-height:190px}
+  .card .cap{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .card.light{background:#FFFFFF;border-color:#E6E9EF}
+  .card.light .cap{color:#7A8393}
+  .card.dark{background:var(--panel)}
+  .card.brand{background:linear-gradient(135deg,#0f1620,#0b1017)}
+
+  /* reusable static mark (chevron + spark) */
+  .mark{display:inline-flex;align-items:center;gap:.16em;font-family:var(--mono);font-weight:700;line-height:1}
+  .mark .m-chev{color:var(--g-blue)}
+  .mark svg{display:block}
+
+  .sizes{display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap}
+  .chip-size{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .chip-size .cap{font-size:11px;color:var(--muted)}
+  .swatch{width:100%;height:64px;border-radius:12px 12px 0 0}
+  .pal{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0}
+  .pal .cell{border:1px solid var(--border)}
+  .pal .cell .meta{padding:12px 14px;font-family:var(--mono);font-size:12.5px;color:var(--muted);border-top:0}
+  .pal .cell .meta b{display:block;color:var(--ink);font-family:var(--sans);font-weight:600;font-size:14px;margin-bottom:2px}
+
+  /* lockup */
+  .lockup{display:inline-flex;align-items:center;gap:20px;padding:30px 34px;border:1px solid var(--border);border-radius:18px;background:var(--panel)}
+  .lockup .icon{width:64px;height:64px;border-radius:16px;background:linear-gradient(180deg,#0f151d,#0b0f15);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+  .lockup .txt .name{font-size:26px;font-weight:700;letter-spacing:-.02em}
+  .lockup .txt .co{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+
+  /* spec */
+  .spec{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  .spec .full{grid-column:1/-1}
+  .spec h3{font-size:17px;color:var(--ink)}
+  .spec p{font-size:15px;color:#B9C2CF;margin:0 0 14px}
+  .anatomy{font-family:var(--mono);font-size:13.5px;color:var(--muted);background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+  .anatomy b{color:var(--g-blue);font-weight:600}
+  .dodont{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .dodont .col{border:1px solid var(--border);border-radius:12px;padding:16px 18px;font-size:14px}
+  .dodont .do b{color:var(--g-green)}
+  .dodont .dont b{color:var(--g-red)}
+  .dodont ul{margin:8px 0 0;padding-left:18px;color:#B9C2CF}
+  .dodont li{margin:4px 0}
+
+  pre{background:#0d1219;border:1px solid var(--border);border-radius:14px;padding:20px;overflow:auto;font-family:var(--mono);font-size:12.5px;color:#c7d0dd;line-height:1.6}
+  .note{font-size:14px;color:var(--muted)}
+  footer{padding:40px 0 70px;color:var(--muted);font-size:13px;text-align:center}
+  @media (max-width:720px){.spec{grid-template-columns:1fr}.dodont{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion:reduce){
+    .cursor,.spark{transition:none}
+    .cursor.blink,.term.bloomed .spark{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ MASTER DEFS (spark + chevron, reused via <use>) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- four-color spark: 4 petals meeting at center, one Google color each (no clipPath = reuses cleanly) -->
+    <symbol id="fl-spark" viewBox="-50 -50 100 100">
+      <path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><!-- NE blue -->
+      <path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><!-- SE red -->
+      <path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><!-- SW yellow -->
+      <path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/><!-- NW green -->
+    </symbol>
+    <!-- single-color sparkle for reversed / monochrome use -->
+    <symbol id="fl-spark-mono" viewBox="-50 -50 100 100">
+      <path d="M0,-46 Q0,0 46,0 Q0,0 0,46 Q0,0 -46,0 Q0,0 0,-46 Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="fl-chevron" viewBox="0 0 44 100">
+      <path d="M10 20 L34 50 L10 80" fill="none" stroke="currentColor"
+            stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="eyebrow">Google&nbsp;&times;&nbsp;University of Waterloo</div>
+
+  <div class="term-window">
+    <div class="dots"><i></i><i></i><i></i></div>
+    <div class="term" id="term" role="img" aria-label="Futures Lab logo: a command prompt cursor blinks, then blooms into a four-color spark">
+      <span class="chev">&gt;</span><span class="slot"><span class="cursor" id="cursor"></span><span class="spark" id="spark"><svg viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></span></span>
+    </div>
+  </div>
+
+  <div class="hero-word">
+    <div class="name">Futures&nbsp;Lab</div>
+    <div class="co">Agents at Work</div>
+  </div>
+  <p class="tag"><b>Prompt&nbsp;&rarr;&nbsp;Product.</b> &nbsp;Coding used to be the barrier. Now you just describe what you want.</p>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ REST STATE ============ -->
+  <section>
+    <h2>The logo at rest</h2>
+    <p class="lead" style="margin-bottom:28px">When it isn't animating — on a business card, a slide, a favicon — the mark freezes at its payoff: the <code class="k">&gt;</code> prompt beside the four-color spark. That pairing is the logo.</p>
+    <div class="grid">
+      <div class="card brand">
+        <div class="mark" style="font-size:52px"><span class="m-chev">&gt;</span><svg width="52" height="52" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></div>
+        <div class="cap">Primary</div>
+      </div>
+      <div class="card light">
+        <div class="mark" style="font-size:44px;color:#1B2029"><span class="m-chev">&gt;</span><svg width="44" height="44" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></div>
+        <div class="cap">On light</div>
+      </div>
+      <div class="card dark">
+        <div class="mark" style="font-size:44px"><span class="m-chev">&gt;</span><svg width="44" height="44" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></div>
+        <div class="cap">On dark</div>
+      </div>
+      <div class="card" style="background:var(--g-blue)">
+        <div class="mark" style="font-size:44px;color:#fff"><span style="color:#fff">&gt;</span>
+          <svg width="44" height="44" viewBox="-50 -50 100 100" style="color:#fff"><path d="M0,-46 Q0,0 46,0 Q0,0 0,46 Q0,0 -46,0 Q0,0 0,-46 Z" fill="currentColor"/></svg></div>
+        <div class="cap" style="color:rgba(255,255,255,.85)">1-color (reversed)</div>
+      </div>
+    </div>
+
+    <div style="margin-top:34px" class="sizes">
+      <div class="chip-size"><div class="mark" style="font-size:56px"><span class="m-chev">&gt;</span><svg width="56" height="56" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></div><div class="cap">Favicon 56</div></div>
+      <div class="chip-size"><div class="mark" style="font-size:32px"><span class="m-chev">&gt;</span><svg width="32" height="32" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></div><div class="cap">32</div></div>
+      <div class="chip-size"><div class="mark" style="font-size:24px"><span class="m-chev">&gt;</span><svg width="24" height="24" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></div><div class="cap">24</div></div>
+      <div class="chip-size"><div class="mark" style="font-size:16px"><span class="m-chev">&gt;</span><svg width="16" height="16" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></div><div class="cap">16</div></div>
+    </div>
+  </section>
+
+  <!-- ============ LOCKUP ============ -->
+  <section>
+    <h2>Horizontal lockup</h2>
+    <div class="lockup">
+      <div class="icon"><div class="mark" style="font-size:30px"><span class="m-chev">&gt;</span><svg width="30" height="30" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></div></div>
+      <div class="txt">
+        <div class="name">Futures&nbsp;Lab</div>
+        <div class="co">Google&nbsp;&times;&nbsp;University of Waterloo</div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:18px">Keep clear space around the mark equal to the height of the spark. The wordmark uses a geometric sans (Google Sans / Inter); the prompt and spark always stay monospace-native.</p>
+  </section>
+
+  <!-- ============ COLOR ============ -->
+  <section>
+    <h2>Google color palette</h2>
+    <p class="lead" style="margin-bottom:26px">The four colors appear together in exactly one place — the spark. Everything else (chevron, cursor, text) stays restrained so the bloom is the only burst of full spectrum.</p>
+    <div class="pal">
+      <div class="cell"><div class="swatch" style="background:#4285F4"></div><div class="meta"><b>Blue</b>#4285F4 · top-right</div></div>
+      <div class="cell"><div class="swatch" style="background:#EA4335"></div><div class="meta"><b>Red</b>#EA4335 · bottom-right</div></div>
+      <div class="cell"><div class="swatch" style="background:#FBBC05"></div><div class="meta"><b>Yellow</b>#FBBC05 · bottom-left</div></div>
+      <div class="cell"><div class="swatch" style="background:#34A853"></div><div class="meta"><b>Green</b>#34A853 · top-left</div></div>
+    </div>
+    <p class="note" style="margin-top:16px">Neutrals — ink <code class="k">#E7ECF3</code> / <code class="k">#1B2029</code>, terminal surface <code class="k">#141A22</code>, hairline <code class="k">#232B36</code>. The chevron & cursor use Google&nbsp;Blue as the "seed" that blooms into all four.</p>
+  </section>
+
+  <!-- ============ THE CHARACTER, DESCRIBED ============ -->
+  <section>
+    <h2>The character, described</h2>
+    <div class="spec">
+      <div class="full">
+        <h3>Concept</h3>
+        <p>A single command line stands in for the old world of building software: a <code class="k">&gt;</code> prompt and a blinking cursor. A student types an ordinary request in plain language — <em>build my app</em>, <em>teach me chemistry</em>, <em>analyze this data</em> — and at the end of the sentence the cursor <b>blooms</b> into a four-color spark: the thing they asked for, now real. That's the whole thesis of Futures Lab in one gesture — <b>you describe it, it exists</b> — and the spark carries Google's four colors, so the brand partnership lives inside the payoff rather than being bolted on.</p>
+      </div>
+
+      <div>
+        <h3>Anatomy</h3>
+        <div class="anatomy">
+<b>&gt;</b>&nbsp;&nbsp;the prompt — Google&nbsp;Blue, weight&nbsp;700<br>
+<b>_</b>&nbsp;&nbsp;the cursor — a blue underscore that blinks<br>
+<b>✦</b>&nbsp;&nbsp;the spark — a 4-point sparkle, one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Google color per quadrant (the payoff)
+        </div>
+        <p style="margin-top:14px">The spark is a four-pointed star with concave sides — a "sparkle," not a compass star — sized ~1.5&times; the cap height so it reads as the hero of the line. It sits exactly where the cursor was, so the eye reads transformation, not replacement.</p>
+      </div>
+
+      <div>
+        <h3>Motion (the "type, then bloom" loop)</h3>
+        <div class="anatomy">
+0.0s&nbsp;&nbsp;<b>&gt;_</b> — the underscore cursor blinks<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4 times (~0.5s per tick)<br>
+2.1s&nbsp;&nbsp;<b>bloom</b> — cursor fades as the spark<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scales up (ease-out, slight rotate)<br>
+2.6s&nbsp;&nbsp;spark holds &amp; gently twinkles<br>
+4.0s&nbsp;&nbsp;mark fades, resets, loops
+        </div>
+        <p style="margin-top:14px">Total loop ≈ 4.2s. Respects <code class="k">prefers-reduced-motion</code>: motion-sensitive visitors see the finished state (<code class="k">&gt;&nbsp;✦</code>) with no animation.</p>
+      </div>
+
+      <div class="full">
+        <div class="dodont">
+          <div class="col do"><b>✓ Do</b>
+            <ul>
+              <li>Let the spark be the only place all four colors meet.</li>
+              <li>Keep the prompt monospace — it signals "command line / build."</li>
+              <li>Swap the typed request freely; keep it lowercase & plain-language.</li>
+              <li>Give it room; the spark needs air to bloom.</li>
+            </ul>
+          </div>
+          <div class="col dont"><b>✕ Don't</b>
+            <ul>
+              <li>Don't recolor the chevron or cursor rainbow — restraint sells the bloom.</li>
+              <li>Don't set the request in a rounded/handwritten font.</li>
+              <li>Don't stretch the spark; scale it uniformly.</li>
+              <li>Don't add a second spark near the mark — one payoff.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EMBED ============ -->
+  <section>
+    <h2>Drop it into your site</h2>
+    <p class="lead" style="margin-bottom:22px">Self-contained — no libraries, no fonts to load. Paste this where you want the animated mark (a hero header, a nav bar). Change <code class="k">BLINKS</code> for more or fewer ticks before the bloom.</p>
+    <pre id="embedCode">&lt;!-- Futures Lab animated mark --&gt;
+&lt;span class="fl-term" role="img" aria-label="Futures Lab"&gt;
+  &lt;span class="fl-chev"&gt;&gt;&lt;/span&gt;&lt;span class="fl-slot"&gt;
+    &lt;span class="fl-cursor"&gt;&lt;/span&gt;
+    &lt;svg class="fl-spark" viewBox="-50 -50 100 100" aria-hidden="true"&gt;
+      &lt;path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/&gt;
+      &lt;path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/&gt;
+      &lt;path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/&gt;
+      &lt;path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/&gt;
+    &lt;/svg&gt;
+  &lt;/span&gt;
+&lt;/span&gt;
+
+&lt;style&gt;
+.fl-term{font-family:ui-monospace,"SF Mono","Roboto Mono",Menlo,monospace;font-weight:700;
+  font-size:40px;display:inline-flex;align-items:center;gap:.09em;color:#E7ECF3;transition:opacity .42s}
+.fl-chev{color:#4285F4}
+.fl-slot{position:relative;display:inline-block;width:1.15em;height:1.15em}
+.fl-cursor{position:absolute;left:.03em;bottom:.26em;width:.52em;height:.14em;background:#4285F4;
+  border-radius:3px;box-shadow:0 0 10px rgba(66,133,244,.5);transition:opacity .12s}
+.fl-spark{position:absolute;left:50%;top:50%;width:100%;height:100%;
+  transform:translate(-50%,-50%) scale(.1) rotate(-40deg);opacity:0;
+  transition:transform .5s cubic-bezier(.18,.85,.25,1),opacity .34s}
+.fl-term.bloom .fl-spark{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}
+&lt;/style&gt;
+
+&lt;script&gt;
+(function(){
+  var BLINKS=4;                            // ← ticks before the bloom
+  var t=document.querySelector(".fl-term"), cur=t.querySelector(".fl-cursor");
+  var wait=function(ms){return new Promise(function(r){setTimeout(r,ms)})};
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){ cur.style.opacity=0; t.classList.add("bloom"); return; }
+  (async function loop(){while(true){
+    t.classList.remove("bloom"); t.style.opacity=1; cur.style.opacity=1; await wait(520);
+    for(var i=0;i&lt;BLINKS;i++){ cur.style.opacity=0; await wait(250); cur.style.opacity=1; await wait(300); }
+    cur.style.opacity=0; t.classList.add("bloom"); await wait(1750);
+    t.style.opacity=0; await wait(440);
+  }})();
+})();
+&lt;/script&gt;</pre>
+    <p class="note">Prefer a static image for a favicon or social avatar? Use the separate <code class="k">futures-lab-mark.svg</code> file — it's the resting <code class="k">&gt;</code>&nbsp;+&nbsp;spark in a rounded panel.</p>
+  </section>
+</div>
+
+<footer>Futures Lab — Prompt → Product · Google × University of Waterloo</footer>
+
+<!-- ============ HERO ANIMATION DRIVER ============ -->
+<script>
+(function(){
+  var BLINKS = 4;                 // how many times the cursor ticks before it blooms
+  var term   = document.getElementById('term');
+  var cursor = document.getElementById('cursor');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var wait   = function(ms){return new Promise(function(r){setTimeout(r,ms)})};
+
+  if(reduce){ cursor.style.opacity = 0; term.classList.add('bloomed'); return; }
+
+  (async function loop(){
+    while(true){
+      // > _   — steady beat, then blink N times
+      term.classList.remove('bloomed','resetting');
+      cursor.style.opacity = 1;
+      await wait(520);
+      for(var i=0;i<BLINKS;i++){ cursor.style.opacity = 0; await wait(250); cursor.style.opacity = 1; await wait(300); }
+      await wait(120);
+      // bloom — the underscore fades as the spark opens in its place
+      cursor.style.opacity = 0;
+      term.classList.add('bloomed');
+      await wait(1750);
+      // fade the whole mark out, reset while invisible, loop
+      term.classList.add('resetting');
+      await wait(440);
+    }
+  })();
+})();
+</script>
+</body>
+</html>

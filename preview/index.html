@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Futures Lab: Agents at Work — design sketch</title>
+<link rel="icon" type="image/svg+xml" href="media/futures-lab-mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- the hero poster is served from here and is the LCP image -->
+<link rel="preconnect" href="https://i.ytimg.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  /* Google accent palette — used in auras + accents, never as flat fills */
+  --blue:#4285F4;
+  --red:#EA4335;
+  --yellow:#FBBC05;
+  --green:#34A853;
+
+  /* Neutrals */
+  --ink:#1f1f1f;
+  /* darkened from Google's #5f6368/#80868b: the hero auras tint the page
+     enough that the lighter grays fell under 4.5:1 for body copy */
+  --gray:#4e5257;
+  --gray-soft:#63686d;
+  --surface:#ffffff;
+  --tint:#f8f9fa;
+  --placeholder:#eceff1;
+  --hairline:#eef0f2;
+  --figure-off:#E8EAED;
+
+  /* Radii — soft, 12–20px */
+  --r-sm:12px;
+  --r-md:16px;
+  --r-lg:20px;
+  --r-pill:999px;
+
+  /* Soft diffuse shadows — no hard borders anywhere */
+  --sh-1:0 1px 2px rgba(60,64,67,.04), 0 4px 14px rgba(60,64,67,.06);
+  --sh-2:0 2px 6px rgba(60,64,67,.05), 0 16px 38px rgba(60,64,67,.10);
+  --sh-3:0 4px 10px rgba(60,64,67,.06), 0 28px 60px rgba(60,64,67,.12);
+
+  /* Rhythm */
+  --wrap:1120px;
+  --gutter:clamp(20px, 5vw, 40px);
+  /* stacks with the next section's padding, so the gap between two
+     sections is ~2x this — keep it under ~200px at desktop */
+  --sec-y:clamp(56px, 7.5vw, 100px);
+
+  --font:"Google Sans","Google Sans Text",Roboto,Inter,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+}
+
+/* ============================================================
+   RESET / BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+/* clip, not hidden: `hidden` makes body a scroll container and can
+   break the sticky nav. `clip` contains the aura bleed with neither. */
+/* scroll-padding clears the 72px sticky nav on every in-page jump,
+   so anchored sections don't land underneath it */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:clip;scroll-padding-top:96px}
+body{
+  margin:0;
+  font-family:var(--font);
+  font-size:17px;
+  line-height:1.65;
+  color:var(--ink);
+  background:var(--surface);
+  overflow-x:clip;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:4px}
+
+/* ============================================================
+   LAYOUT PRIMITIVES
+   ============================================================ */
+.wrap{width:100%;max-width:var(--wrap);margin-inline:auto;padding-inline:var(--gutter)}
+.sec{position:relative;padding-block:var(--sec-y);z-index:1}
+/* An anchor jump lands on the section's border box, so the whole top
+   padding was being spent on empty space and the next row never peeked
+   above the fold. Cancelling that padding (the nav only ever overlaps
+   blank padding, never content) puts the heading at a constant ~112px
+   at every breakpoint and pulls the following content into view. */
+.sec[id]{scroll-margin-top:calc(16px - var(--sec-y))}
+.sec.sec--flush-top{padding-top:0}
+.sec.sec--tight{padding-block:clamp(56px,8vw,96px)}
+.center{text-align:center}
+.stack-sm > * + *{margin-top:12px}
+.stack-md > * + *{margin-top:20px}
+
+/* ============================================================
+   TYPE SCALE
+   ============================================================ */
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:.8125rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gray);
+}
+.chip-eyebrow{
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  padding:8px 16px;border-radius:var(--r-pill);box-shadow:var(--sh-1);
+}
+.chip-eyebrow::before{
+  content:"";width:7px;height:7px;border-radius:50%;
+  background:var(--blue);flex:none;
+}
+
+.display{
+  font-size:clamp(2.5rem,6.4vw,4.5rem);
+  line-height:1.04;
+  letter-spacing:-.035em;
+  font-weight:500;
+  margin:0;
+  text-wrap:balance;
+}
+.h2{
+  font-size:clamp(1.9rem,4.2vw,3rem);
+  line-height:1.12;
+  letter-spacing:-.028em;
+  font-weight:500;
+  margin:0;
+  text-wrap:balance;
+}
+.h3{
+  font-size:clamp(1.25rem,2.2vw,1.5rem);
+  line-height:1.25;
+  letter-spacing:-.02em;
+  font-weight:500;
+  margin:0;
+}
+.lede{
+  font-size:clamp(1.0625rem,1.55vw,1.25rem);
+  line-height:1.6;
+  color:var(--gray);
+  margin:0;
+  /* avoids single-word orphans as real copy replaces placeholders */
+  text-wrap:pretty;
+}
+.body{color:var(--gray);margin:0}
+/* emphasis inside gray body copy: 500 is this system's "bold" */
+strong{font-weight:500;color:var(--ink)}
+/* the definitional sentence — one size up from body, full contrast */
+.intro__lead{
+  font-size:clamp(1.35rem,2.6vw,1.75rem);
+  line-height:1.38;
+  letter-spacing:-.022em;
+  color:var(--ink);
+  margin:0 auto;
+  max-width:48ch;
+  text-wrap:balance;
+}
+.intro__body{margin-top:24px}
+.micro{font-size:.875rem;color:var(--gray-soft);margin:0}
+.measure{max-width:62ch;margin-inline:auto}
+/* keeps "8-week" from breaking after the hyphen */
+.nowrap{white-space:nowrap}
+.measure-sm{max-width:46ch;margin-inline:auto}
+
+.section-label{
+  display:block;
+  font-size:.8125rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--gray-soft);margin:0 0 16px;
+}
+
+/* ============================================================
+   AURAS — the signature element
+   Three nested layers so each animation owns its own transform:
+   .aura-field  → scroll parallax (JS, --py)
+   .aura-anchor → page-load bloom (scale + opacity)
+   .aura        → endless slow drift
+   ============================================================ */
+.aura-field{
+  position:absolute;
+  inset:-12% -12% -22%;
+  z-index:0;
+  pointer-events:none;
+  transform:translate3d(0,var(--py,0px),0);
+}
+.aura-anchor{
+  position:absolute;
+  left:var(--x);top:var(--y);
+  width:var(--s);height:var(--s);
+  margin-left:calc(var(--s) / -2);
+  margin-top:calc(var(--s) / -2);
+  opacity:1;
+}
+/* Solid core to ~38%, then a long tail out — the blur on top does the
+   final diffusion. A gradient that already fades to transparent AND
+   gets blurred reads as almost-white, so the core stays opaque here. */
+.aura{
+  width:100%;height:100%;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, var(--c) 0%, var(--c) 38%, transparent 72%);
+  filter:blur(var(--b,90px));
+  opacity:var(--o,.34);
+  will-change:transform;
+}
+.aura--blue  {--c:#4285F4}
+.aura--red   {--c:#EA4335}
+.aura--yellow{--c:#FBBC05}
+.aura--green {--c:#34A853}
+
+@media (prefers-reduced-motion: no-preference){
+  .aura-anchor{animation:bloom 1500ms cubic-bezier(.16,.84,.28,1) both}
+  .aura{animation:drift-a var(--d,19s) ease-in-out infinite alternate}
+  .aura--drift-b{animation-name:drift-b}
+}
+@keyframes bloom{
+  from{opacity:0;transform:translate(var(--bx,0),var(--by,0)) scale(.28)}
+  to  {opacity:1;transform:translate(0,0) scale(1)}
+}
+@keyframes drift-a{
+  0%  {transform:translate3d(0,0,0) scale(1)}
+  50% {transform:translate3d(3.5%,-4%,0) scale(1.13)}
+  100%{transform:translate3d(-4%,3%,0) scale(.93)}
+}
+@keyframes drift-b{
+  0%  {transform:translate3d(0,0,0) scale(1.05)}
+  50% {transform:translate3d(-4.5%,3.5%,0) scale(.92)}
+  100%{transform:translate3d(3%,-3.5%,0) scale(1.14)}
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 28px;border-radius:var(--r-pill);
+  font-size:.9375rem;font-weight:500;letter-spacing:-.005em;
+  transition:transform .22s cubic-bezier(.2,.7,.2,1), box-shadow .22s, background-color .22s;
+}
+.btn--primary{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(66,133,244,.24)}
+.btn--primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(66,133,244,.34)}
+.btn--ghost{background:rgba(255,255,255,.86);color:var(--ink);box-shadow:var(--sh-1)}
+.btn--ghost:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+.btn--sm{padding:10px 20px;font-size:.875rem}
+.btn__arrow{flex:none;transition:transform .22s cubic-bezier(.2,.7,.2,1)}
+.btn:hover .btn__arrow{transform:translateX(3px)}
+.link-arrow{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:.9375rem;font-weight:500;color:var(--gray);
+  transition:color .2s,gap .2s;
+}
+.link-arrow:hover{color:var(--blue);gap:11px}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav{
+  position:sticky;top:0;z-index:100;
+  transition:background-color .3s, box-shadow .3s, backdrop-filter .3s;
+}
+.nav.is-scrolled{
+  background:rgba(255,255,255,.74);
+  backdrop-filter:saturate(180%) blur(16px);
+  -webkit-backdrop-filter:saturate(180%) blur(16px);
+  box-shadow:0 1px 0 rgba(60,64,67,.06), 0 6px 24px rgba(60,64,67,.05);
+}
+.nav__inner{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  height:72px;
+}
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:500;letter-spacing:-.02em}
+/* Brand mark: "> ✦" — the prompt and the four-colour spark it blooms into
+   (brand/README.md). Prompt stays monospace per the spec; the four colours
+   meet only in the spark. In the nav it plays the type→bloom gesture ONCE
+   on load, then rests — the infinite loop is for hero/standalone contexts. */
+.brand-mark{
+  display:inline-flex;align-items:center;gap:1px;flex:none;
+  font-family:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;
+  font-weight:700;font-size:1.3125rem;line-height:1;color:var(--blue);
+}
+.brand-mark__slot{position:relative;width:1.15em;height:1.15em;display:inline-block}
+.brand-mark__cursor{
+  position:absolute;left:.08em;bottom:.2em;width:.55em;height:.14em;
+  border-radius:2px;background:var(--blue);
+}
+.brand-mark__spark{
+  position:absolute;inset:0;width:100%;height:100%;
+  transform:scale(.1) rotate(-40deg);opacity:0;
+  transition:transform .5s cubic-bezier(.18,.85,.25,1),opacity .34s ease;
+}
+.brand.is-bloomed .brand-mark__cursor{opacity:0}
+.brand.is-bloomed .brand-mark__spark{transform:scale(1) rotate(0deg);opacity:1}
+@media (prefers-reduced-motion: reduce){
+  .brand-mark__spark{transition:none}
+}
+.nav__links{display:flex;align-items:center;gap:34px}
+.nav__links a{
+  position:relative;font-size:.9375rem;color:var(--gray);
+  transition:color .2s;padding-block:6px;
+}
+.nav__links a:hover{color:var(--ink)}
+/* scrollspy: the current section's link fills in and grows a rule */
+.nav__links a::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:2px;
+  border-radius:2px;background:var(--blue);
+  transform:scaleX(0);transform-origin:50% 50%;
+  transition:transform .28s cubic-bezier(.2,.7,.2,1);
+}
+.nav__links a[aria-current="true"]{color:var(--ink)}
+.nav__links a[aria-current="true"]::after{transform:scaleX(1)}
+
+/* scroll progress — clip-path reveals a fixed 4-colour gradient left to
+   right, so the colours stay put instead of squashing as it grows */
+.scroll-progress{
+  position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:linear-gradient(90deg,var(--blue),var(--red) 34%,var(--yellow) 67%,var(--green));
+  clip-path:inset(0 calc((1 - var(--p,0)) * 100%) 0 0);
+  opacity:0;transition:opacity .3s;
+  pointer-events:none;
+}
+.nav.is-scrolled .scroll-progress{opacity:1}
+.nav__right{display:flex;align-items:center;gap:26px}
+@media (max-width:760px){ .nav__links{display:none} }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{position:relative;padding-top:clamp(56px,9vw,104px);padding-bottom:clamp(48px,7vw,88px)}
+.hero__inner{position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center}
+.hero__headline{margin-top:26px;max-width:22ch}
+/* the program name is constant year to year, the theme is the news —
+   so the name sits back tonally and the theme takes full contrast */
+.headline__program{display:block;color:var(--gray)}
+/* the hook runs full width so it lands on one line at desktop */
+.hero__sub{margin-top:22px;max-width:none}
+.hero__sub--offer{margin-top:14px;max-width:54ch}
+.hero__actions{margin-top:34px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;justify-content:center}
+.hero__deadline{margin:18px 0 0;font-size:.875rem;color:var(--gray)}
+.hero__media{margin-top:clamp(48px,7vw,84px)}
+
+/* ============================================================
+   HERO MEDIA — video facade + photo gallery
+   Slide 0 is the film; the YouTube iframe is only created on click
+   (a "facade"), so the page never loads YouTube's ~1MB of JS or sets
+   any third-party cookie unless someone actually asks to watch.
+   ============================================================ */
+.gallery{position:relative}
+.gallery__viewport{
+  position:relative;
+  border-radius:var(--r-lg);
+  box-shadow:var(--sh-3);
+  overflow:hidden;
+  background:var(--placeholder);
+}
+.gallery__track{
+  display:flex;margin:0;padding:0;list-style:none;
+  transition:transform .62s cubic-bezier(.2,.7,.2,1);
+  will-change:transform;
+}
+.slide{position:relative;flex:0 0 100%;aspect-ratio:16/9;background:var(--placeholder)}
+.slide__facade{
+  position:absolute;inset:0;width:100%;height:100%;
+  padding:0;display:grid;place-items:center;background:none;
+}
+.slide__poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.play-btn{
+  position:relative;
+  width:clamp(56px,6vw,74px);aspect-ratio:1;border-radius:50%;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:var(--sh-2);
+  display:grid;place-items:center;
+  transition:transform .24s cubic-bezier(.2,.7,.2,1), box-shadow .24s;
+}
+.slide__facade:hover .play-btn{transform:scale(1.07);box-shadow:var(--sh-3)}
+.play-btn svg{margin-left:4px}
+.slide__frame{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:1}
+.slide__ph{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-size:.875rem;color:var(--gray-soft);letter-spacing:.02em;
+}
+
+.gallery__arrow{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(255,255,255,.94);
+  box-shadow:var(--sh-2);
+  display:grid;place-items:center;color:var(--ink);
+  transition:transform .22s cubic-bezier(.2,.7,.2,1), box-shadow .22s, opacity .22s;
+  z-index:2;
+}
+.gallery__arrow:hover:not(:disabled){box-shadow:var(--sh-3);transform:translateY(-50%) scale(1.06)}
+.gallery__arrow:disabled{opacity:0;pointer-events:none}
+.gallery__arrow--prev{left:16px}
+.gallery__arrow--next{right:16px}
+
+.gallery__dots{display:flex;justify-content:center;gap:9px;margin-top:20px}
+.dot{
+  width:8px;height:8px;border-radius:50%;padding:0;
+  background:#d7dade;
+  transition:background .25s, width .25s, border-radius .25s;
+}
+.dot:hover{background:var(--gray-soft)}
+.dot[aria-current="true"]{background:var(--blue);width:24px;border-radius:var(--r-pill)}
+.dot[aria-current="true"]:hover{background:var(--blue)}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .gallery__track{transition:none}
+}
+@media (max-width:600px){
+  .gallery__arrow{width:38px;height:38px}
+  .gallery__arrow--prev{left:10px}
+  .gallery__arrow--next{right:10px}
+}
+
+/* ============================================================
+   BENEFITS GRID
+   ============================================================ */
+/* flex, not grid: with 7 tiles the final row centres itself instead of
+   leaving a hole in the 4th column */
+.grid-tiles{
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:14px;margin-top:52px;
+}
+.tile{flex:0 1 100%}
+@media (min-width:620px){ .tile{flex:0 1 calc(50% - 7px)} }
+@media (min-width:960px){
+  .grid-tiles{gap:16px}
+  .tile{flex:0 1 calc(25% - 12px)}
+}
+.tile{
+  background:var(--surface);
+  border-radius:var(--r-lg);
+  padding:26px 24px 28px;
+  box-shadow:var(--sh-1);
+  transition:transform .26s cubic-bezier(.2,.7,.2,1), box-shadow .26s;
+}
+.tile:hover{transform:translateY(-4px);box-shadow:var(--sh-2)}
+.tile__icon{
+  width:44px;height:44px;border-radius:var(--r-sm);
+  display:grid;place-items:center;margin-bottom:18px;
+}
+.tile__icon svg{width:22px;height:22px}
+.tile__title{
+  font-size:1.0625rem;font-weight:500;letter-spacing:-.014em;
+  line-height:1.3;margin:0 0 8px;
+}
+/* No reserved title height. Padding out the title to force body copy onto
+   a shared baseline puts a two-line gap under every one-line title, which
+   reads as broken — proximity says a title and its own body must sit
+   closer together than anything else in the card. Slack belongs at the
+   bottom of the card, where equal heights absorb it invisibly. */
+.tile__body{font-size:.9375rem;color:var(--gray);margin:0;line-height:1.55}
+.i-blue  {background:rgba(66,133,244,.1);  color:var(--blue)}
+.i-red   {background:rgba(234,67,53,.1);   color:var(--red)}
+.i-yellow{background:rgba(251,188,5,.14);  color:#c8960a}
+.i-green {background:rgba(52,168,83,.1);   color:var(--green)}
+
+/* Callout band under the grid */
+/* ============================================================
+   DEMO DAY
+   ============================================================ */
+.demo{
+  display:grid;gap:clamp(28px,4vw,56px);align-items:center;
+  background:var(--tint);
+  border-radius:var(--r-lg);
+  padding:clamp(28px,4vw,48px);
+}
+@media (min-width:860px){
+  .demo{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+}
+.demo__media{position:relative}
+.demo__photo,.demo__ph{
+  width:100%;aspect-ratio:4/3;
+  border-radius:var(--r-md);
+  box-shadow:var(--sh-2);
+}
+.demo__photo{object-fit:cover}
+.demo__ph{
+  background:var(--placeholder);
+  display:grid;place-items:center;
+  font-size:.875rem;color:var(--gray-soft);letter-spacing:.02em;
+  text-align:center;padding:16px;
+}
+
+/* ============================================================
+   TESTIMONIALS
+   ============================================================ */
+/* One feature card beside two stacked. The three quotes differ ~3x in
+   length; three equal columns would leave the shortest card half empty.
+   This absorbs the difference instead of forcing the quotes to match. */
+.grid-quotes{
+  display:grid;gap:16px;margin-top:52px;
+  grid-template-columns:1fr;
+}
+@media (min-width:900px){
+  .grid-quotes{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+  .quote--feature{grid-row:span 2}
+}
+.quote{
+  background:var(--surface);
+  border-radius:var(--r-lg);
+  padding:32px 30px;
+  box-shadow:var(--sh-1);
+  display:flex;flex-direction:column;gap:26px;
+  transition:transform .26s cubic-bezier(.2,.7,.2,1), box-shadow .26s;
+}
+.quote:hover{transform:translateY(-4px);box-shadow:var(--sh-2)}
+.quote__mark{font-size:2rem;line-height:1;color:var(--blue);opacity:.4;font-weight:600}
+.quote__text{margin:0;font-size:1.0625rem;line-height:1.6;letter-spacing:-.012em;flex:1}
+/* the feature quote earns a size up for the space it occupies — sized to
+   fill the height the two stacked cards force on it, not just to be big */
+.quote--feature .quote__text{font-size:clamp(1.25rem,2vw,1.625rem);line-height:1.45}
+.quote--feature{padding:36px 34px}
+.quote__foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.quote__person{display:flex;align-items:center;gap:14px;min-width:0}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--placeholder);flex:none;object-fit:cover}
+.quote__name{font-size:.9375rem;font-weight:500;margin:0}
+.quote__role{font-size:.8125rem;color:var(--gray-soft);margin:0}
+/* the artefact they shipped — the hardest proof on the card, and a
+   button: it opens a shot of the prototype. Click/tap/Enter all work;
+   hover-only would strand every touch user. */
+.quote__project{
+  display:inline-flex;align-items:center;gap:8px;
+  margin:0;padding:7px 14px;border-radius:var(--r-pill);
+  background:var(--tint);
+  font-size:.8125rem;font-weight:500;color:var(--gray);
+  white-space:nowrap;
+  transition:background-color .2s, color .2s, transform .2s cubic-bezier(.2,.7,.2,1);
+}
+.quote__project::before{
+  content:"";width:6px;height:6px;border-radius:50%;flex:none;
+  background:var(--dot,var(--blue));
+}
+button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:translateY(-1px)}
+.quote__project svg{opacity:.55}
+
+/* prototype dialog */
+.shot{
+  border:0;padding:0;background:none;max-width:min(1040px,94vw);width:100%;
+  border-radius:var(--r-lg);overflow:visible;
+}
+.shot::backdrop{background:rgba(31,31,31,.42);backdrop-filter:blur(3px)}
+.shot__inner{
+  background:var(--surface);border-radius:var(--r-lg);
+  box-shadow:var(--sh-3);overflow:hidden;
+}
+/* No fixed ratio on the real screenshot: a prototype shot must never be
+   cropped — cropping a UI throws away the thing you came to look at. The
+   image keeps its own proportions; max-height guards portrait shots. */
+.shot__img{
+  display:block;width:100%;height:auto;
+  max-height:72vh;object-fit:contain;
+  background:var(--placeholder);
+}
+.shot__ph{width:100%;aspect-ratio:16/10;display:block}
+.shot__ph{
+  background:var(--placeholder);display:grid;place-items:center;
+  font-size:.875rem;color:var(--gray-soft);text-align:center;padding:20px;
+}
+.shot__bar{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:16px 20px;
+}
+.shot__title{margin:0;font-size:.9375rem;font-weight:500}
+.shot__by{margin:2px 0 0;font-size:.8125rem;color:var(--gray-soft)}
+.shot__close{
+  width:36px;height:36px;border-radius:50%;flex:none;
+  display:grid;place-items:center;color:var(--gray);
+  transition:background-color .2s,color .2s;
+}
+.shot__close:hover{background:var(--tint);color:var(--ink)}
+
+/* ============================================================
+   APPLY
+   ============================================================ */
+.apply{
+  display:grid;gap:clamp(28px,4vw,48px);
+  margin-top:clamp(40px,5vw,60px);
+  align-items:start;
+}
+@media (min-width:900px){
+  .apply{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+}
+.apply__prose h3 + p{margin-top:12px}
+.apply__prose h3 ~ h3{margin-top:32px}
+.apply__facts{
+  background:var(--tint);
+  border-radius:var(--r-lg);
+  padding:clamp(24px,3vw,32px);
+}
+/* label column stays fixed so the values form a scannable edge; values
+   are left-aligned because "Fridays, Oct 2 – Nov 27" wraps and a
+   right-aligned ragged edge would be unreadable */
+.facts{margin:0;padding:0}
+.facts > div{
+  display:grid;grid-template-columns:84px minmax(0,1fr);
+  gap:16px;padding:14px 0;align-items:baseline;
+}
+.facts > div:first-child{padding-top:0}
+.facts > div:last-child{padding-bottom:0}
+.facts > div + div{box-shadow:inset 0 1px 0 var(--hairline)}
+.facts dt{margin:0;font-size:.875rem;color:var(--gray-soft)}
+.facts dd{margin:0;font-size:.9375rem;font-weight:500;color:var(--ink)}
+.facts__note{
+  display:block;margin-top:5px;
+  font-size:.8125rem;font-weight:400;color:var(--gray-soft);
+}
+.apply__cta{margin-top:clamp(40px,5vw,56px)}
+.btn--lg{padding:17px 34px;font-size:1rem}
+.apply-note{margin:16px 0 0;font-size:.8125rem;color:var(--gray-soft)}
+
+/* ============================================================
+   METRICS
+   Palette note: the level bar is the only real categorical encoding
+   here. Ran the three candidate hue sets through a CVD validator —
+   blue/red/green collides hard for deuteranopes (dE 4.1) and darkening
+   the yellow toward amber collides with green (dE 4.5). The brand
+   blue/yellow/green is the strongest set at dE 13.0, so it stays; the
+   yellow's low contrast is discharged with direct labels + 3px gaps,
+   never colour alone.
+   ============================================================ */
+.metric-block + .metric-block{margin-top:clamp(56px,7vw,88px)}
+
+/* (a) pictograph */
+.picto{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:clamp(28px,5vw,64px);flex-wrap:wrap;
+}
+/* fixed 10-col grid so the row never orphans a figure; 5x2 on mobile */
+.picto__figures{
+  display:grid;grid-template-columns:repeat(10,1fr);gap:10px;
+  flex:1 1 380px;min-width:0;max-width:560px;
+}
+.picto__figures svg{width:100%;height:auto;color:var(--figure-off)}
+/* fill runs left to right once the row is in view */
+.picto__figures svg.on{transition:color .5s ease;transition-delay:var(--d,0ms)}
+.picto__figures.is-lit svg.on{color:var(--fill)}
+.picto__readout{flex:none}
+@media (max-width:600px){
+  .picto__figures{grid-template-columns:repeat(5,1fr);gap:12px;max-width:300px}
+}
+.big-number{
+  font-size:clamp(3.25rem,8vw,5.5rem);
+  font-weight:500;letter-spacing:-.045em;line-height:1;margin:0;
+}
+.big-number__label{margin:10px 0 0;font-size:.9375rem;color:var(--gray);max-width:22ch}
+
+/* (b) three-number stat band */
+/* explicit columns, not auto-fit: auto-fit wrapped 2+1 in the 600–820px
+   band, orphaning the third stat off-centre. Three-up or stacked, never
+   a ragged wrap. */
+.stat-band{
+  display:grid;gap:28px;
+  grid-template-columns:1fr;
+  background:var(--tint);
+  border-radius:var(--r-lg);
+  padding:clamp(34px,5vw,56px) clamp(24px,4vw,44px);
+  text-align:center;
+}
+@media (min-width:640px){ .stat-band{grid-template-columns:repeat(3,1fr);gap:20px} }
+.stat__num{
+  font-size:clamp(2.5rem,5.5vw,3.75rem);
+  font-weight:500;letter-spacing:-.04em;line-height:1;margin:0;
+}
+.stat__label{margin:12px 0 0;font-size:.9375rem;color:var(--gray)}
+
+/* (c) who's in the room */
+.room__label{text-align:center}
+.chips{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+  margin:0;padding:0;list-style:none;
+}
+.chip{
+  padding:9px 18px;border-radius:var(--r-pill);
+  background:var(--surface);color:var(--ink);
+  font-size:.875rem;font-weight:500;
+  box-shadow:var(--sh-1);
+  display:inline-flex;align-items:center;gap:9px;
+}
+.chip::before{
+  content:"";width:7px;height:7px;border-radius:50%;flex:none;
+  background:var(--dot,var(--blue));
+}
+.room__note{text-align:center;margin:22px 0 0;font-size:.9375rem;color:var(--gray)}
+
+/* majors marquee */
+.marquee{
+  position:relative;margin-top:clamp(32px,4vw,44px);
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
+}
+.marquee__track{
+  display:flex;width:max-content;
+  animation:marquee 46s linear infinite;
+}
+.marquee:hover .marquee__track,
+.marquee:focus-within .marquee__track{animation-play-state:paused}
+.marquee__list{
+  display:flex;gap:0;margin:0;padding:0;list-style:none;
+  font-size:.9375rem;color:var(--gray);white-space:nowrap;
+}
+.marquee__list li{padding-inline:16px;position:relative}
+.marquee__list li + li::before{
+  content:"·";position:absolute;left:-2px;color:var(--gray-soft);
+}
+.marquee__list li.is-more{color:var(--ink);font-weight:500}
+@keyframes marquee{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+@media (prefers-reduced-motion: reduce){
+  /* no drift: wrap the list and let it sit still */
+  .marquee{overflow:visible;-webkit-mask-image:none;mask-image:none}
+  .marquee__track{animation:none;width:auto;flex-wrap:wrap;justify-content:center}
+  .marquee__list{flex-wrap:wrap;justify-content:center;white-space:normal;row-gap:6px}
+  .marquee__dup{display:none}
+  /* pictograph fill and bar grow land on their final value with no tween */
+  .picto__figures svg.on,.segbar span{transition:none}
+}
+
+/* level bar */
+.levels{margin-top:clamp(36px,4.5vw,52px)}
+.segbar{display:flex;height:14px;gap:3px}
+.segbar span{
+  display:block;height:100%;border-radius:var(--r-pill);
+  width:0;transition:width .9s cubic-bezier(.2,.7,.2,1);
+  transition-delay:var(--d,0ms);
+}
+.levels.is-grown .segbar span{width:var(--w)}
+.seg-legend{
+  display:flex;flex-wrap:wrap;gap:10px 28px;
+  margin:16px 0 0;padding:0;list-style:none;
+}
+.seg-legend li{display:flex;align-items:baseline;gap:8px;font-size:.875rem;color:var(--gray)}
+.seg-legend i{width:9px;height:9px;border-radius:50%;flex:none;transform:translateY(-1px)}
+.seg-legend b{font-weight:500;color:var(--ink)}
+.levels__caption{margin:18px 0 0;font-size:.9375rem;color:var(--gray);text-align:center}
+
+/* kicker */
+.kicker{
+  margin:clamp(48px,6vw,72px) auto 0;
+  text-align:center;max-width:34ch;
+  font-size:clamp(1.125rem,1.9vw,1.375rem);
+  line-height:1.4;letter-spacing:-.02em;color:var(--ink);
+  text-wrap:balance;
+}
+
+/* ============================================================
+   PARTNER BAND
+   ============================================================ */
+.partner{
+  position:relative;overflow:hidden;
+  background:var(--tint);
+  border-radius:var(--r-lg);
+  padding:clamp(48px,8vw,96px) clamp(28px,5vw,64px);
+  text-align:center;
+}
+.partner__inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
+/* audience switch: the dot goes red so this eyebrow reads as a different
+   thread from the blue-dotted student sections above it */
+.partner .section-label{color:var(--gray)}
+/* --gray not --gray-soft: the yellow aura sits under this note and
+   scales +14% on drift; the darker ink keeps it clear of 4.5:1 at the
+   tint's peak, where gray-soft was only 4.8:1 at rest */
+.partner__note{margin:14px 0 0;font-size:.8125rem;color:var(--gray)}
+
+/* ============================================================
+   COLOPHON
+   ============================================================ */
+.colophon{padding-block:clamp(32px,4vw,44px);box-shadow:inset 0 1px 0 var(--hairline)}
+.colophon__inner{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px 32px;flex-wrap:wrap;
+}
+.colophon__meta{margin:0;font-size:.8125rem;color:var(--gray-soft)}
+
+/* ============================================================
+   SCROLL REVEAL
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference){
+  .reveal{opacity:0;transform:translateY(20px)}
+  .reveal.is-in{
+    opacity:1;transform:none;
+    transition:opacity .78s cubic-bezier(.2,.7,.2,1), transform .78s cubic-bezier(.2,.7,.2,1);
+    transition-delay:var(--delay,0ms);
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Shared icon defs (placeholder geometry only) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="figure" viewBox="0 0 24 40">
+    <circle cx="12" cy="7" r="6" fill="currentColor"/>
+    <path d="M12 15c-5 0-8 3.2-8 7.4V38a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V22.4C20 18.2 17 15 12 15Z" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<!-- ============================================================
+     NAV
+     ============================================================ -->
+<header class="nav" id="nav">
+  <div class="wrap nav__inner">
+    <a class="brand" id="navBrand" href="#top">
+      <span class="brand-mark" aria-hidden="true">&gt;<span class="brand-mark__slot"><span class="brand-mark__cursor"></span><svg class="brand-mark__spark" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></span></span>
+      Futures Lab
+    </a>
+    <div class="nav__right">
+      <!-- three anchors only: the scroll is the primary navigation, so
+           these are shortcuts for people who already know what they want.
+           Metrics, demo day and partners are scroll-discovered. -->
+      <nav class="nav__links" aria-label="Sections">
+        <a href="#intro">Program</a>
+        <a href="#benefits">Outcomes</a>
+        <a href="#stories">Testimonials</a>
+        <a href="#metrics">Impact</a>
+      </nav>
+      <a class="btn btn--primary btn--sm" href="#apply">Apply</a>
+    </div>
+  </div>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+</header>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hero" id="top">
+  <!-- aura backdrop: four Google-colour blobs, bloom outward on load -->
+  <div class="aura-field" data-parallax data-speed="0.10" aria-hidden="true">
+    <div class="aura-anchor" style="--x:27%;--y:32%;--s:clamp(340px,62vw,1000px);--bx:110%;--by:55%;animation-delay:80ms">
+      <div class="aura aura--blue" style="--o:.38;--b:110px;--d:19s"></div>
+    </div>
+    <div class="aura-anchor" style="--x:73%;--y:26%;--s:clamp(300px,54vw,880px);--bx:-85%;--by:70%;animation-delay:200ms">
+      <div class="aura aura--red aura--drift-b" style="--o:.30;--b:115px;--d:23s"></div>
+    </div>
+    <div class="aura-anchor" style="--x:64%;--y:68%;--s:clamp(320px,56vw,920px);--bx:-65%;--by:-60%;animation-delay:320ms">
+      <div class="aura aura--yellow" style="--o:.34;--b:110px;--d:16s"></div>
+    </div>
+    <div class="aura-anchor" style="--x:33%;--y:74%;--s:clamp(300px,54vw,900px);--bx:90%;--by:-55%;animation-delay:440ms">
+      <div class="aura aura--green aura--drift-b" style="--o:.30;--b:115px;--d:21s"></div>
+    </div>
+  </div>
+
+  <div class="wrap hero__inner">
+    <span class="eyebrow chip-eyebrow reveal">Google × University of Waterloo</span>
+    <h1 class="display hero__headline reveal" style="--delay:90ms">
+      <span class="headline__program">Futures Lab:</span>Agents at Work
+    </h1>
+    <!-- two beats: the provocation, then the offer -->
+    <p class="lede hero__sub reveal" style="--delay:180ms">
+      Coding used to be the barrier to building the tools you want. It isn’t anymore.
+    </p>
+    <p class="lede hero__sub hero__sub--offer reveal" style="--delay:230ms">
+      Regardless of your major, learn to design and deploy AI agents that do real work —
+      and graduate as the problem-solver every employer is hunting for.
+    </p>
+    <div class="hero__actions reveal" style="--delay:260ms">
+      <!-- goes to the Apply section first, not straight to the form —
+           requirements are read before the form opens -->
+      <a class="btn btn--primary" href="#apply">
+        Apply for Fall 2026
+        <svg class="btn__arrow" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a class="link-arrow" href="#partners">
+        Bring it to your campus
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+    <p class="hero__deadline reveal" style="--delay:320ms">Applications close September 18</p>
+  </div>
+
+  <div class="wrap hero__media reveal" style="--delay:340ms">
+    <div class="gallery" id="gallery" role="region"
+         aria-roledescription="carousel" aria-label="Futures Lab film and photos">
+      <div class="gallery__viewport">
+        <ul class="gallery__track">
+
+          <li class="slide slide--video">
+            <button class="slide__facade" type="button" id="playBtn"
+                    aria-label="Play the film: Futures Lab Waterloo x Google">
+              <!-- YouTube's own thumbnail for this video. To use a custom frame
+                   instead, save it locally and point src at it — YouTube cannot
+                   serve an arbitrary timestamp.
+                   alt="" is correct: the wrapping button carries the label. -->
+              <img class="slide__poster" width="1280" height="720" alt="" fetchpriority="high"
+                   src="https://i.ytimg.com/vi/mYJ_G5MH0vU/maxresdefault.jpg">
+              <span class="play-btn" aria-hidden="true">
+                <svg width="19" height="21" viewBox="0 0 17 19" fill="none"><path d="M16 9.5 0 19V0l16 9.5Z" fill="#1f1f1f"/></svg>
+              </span>
+            </button>
+          </li>
+
+          <!-- swap each .slide__ph for <img class="slide__poster" loading="lazy" src="…" alt="…"> -->
+          <li class="slide" inert><div class="slide__ph">[photo 01]</div></li>
+          <li class="slide" inert><div class="slide__ph">[photo 02]</div></li>
+          <li class="slide" inert><div class="slide__ph">[photo 03]</div></li>
+          <li class="slide" inert><div class="slide__ph">[photo 04]</div></li>
+
+        </ul>
+
+        <button class="gallery__arrow gallery__arrow--prev" type="button" aria-label="Previous" disabled>
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="gallery__arrow gallery__arrow--next" type="button" aria-label="Next">
+          <svg width="17" height="17" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="gallery__dots"></div>
+      <p class="sr-only" aria-live="polite" id="galleryStatus">Item 1 of 5: the film</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     INTRO — what is this
+     ============================================================ -->
+<section class="sec" id="intro">
+  <div class="wrap center">
+    <span class="section-label reveal">What is Futures Lab?</span>
+    <p class="intro__lead reveal" style="--delay:90ms">
+      Futures Lab is an <span class="nowrap">8-week</span>, hands-on workshop at the
+      University of Waterloo, run with Google.
+    </p>
+    <p class="lede measure intro__body reveal" style="--delay:160ms">
+      It’s built on a simple idea: <strong>anyone can build with AI</strong> — no code or AI
+      experience needed, just <em>curiosity</em> and a willingness to <em>break things</em>.
+      You’ll work in a small, interdisciplinary team, move fast, test your ideas on real
+      people, and leave with a working AI project on your CV.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     BENEFITS / SKILLS GRID
+     ============================================================ -->
+<section class="sec" id="benefits">
+  <div class="wrap">
+    <div class="center">
+      <span class="section-label reveal">Outcomes</span>
+      <!-- the heading is the start of a sentence the tiles finish -->
+      <h2 class="h2 measure-sm reveal" style="--delay:80ms">By the end, you’ll be able to:</h2>
+    </div>
+
+    <div class="grid-tiles">
+      <!-- 01 — sparkle: describing software into existence -->
+      <article class="tile reveal">
+        <div class="tile__icon i-blue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 3.5l1.7 4.8 4.8 1.7-4.8 1.7L10 16.5l-1.7-4.8L3.5 10l4.8-1.7L10 3.5Z"/>
+            <path d="M17.6 14l.85 2.15 2.15.85-2.15.85L17.6 20l-.85-2.15L14.6 17l2.15-.85L17.6 14Z"/>
+          </svg>
+        </div>
+        <h3 class="tile__title">Build real apps with AI</h3>
+        <p class="tile__body"> Turn ideas into software using plain language. It’s called <em>vibe coding</em> — and you won't need to write a single line of code.</p>
+      </article>
+
+      <!-- 02 — workflow: a task handed down through steps -->
+      <article class="tile reveal" style="--delay:60ms">
+        <div class="tile__icon i-red" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2.8" y="3.6" width="8.4" height="5.6" rx="1.8"/>
+            <rect x="12.8" y="14.8" width="8.4" height="5.6" rx="1.8"/>
+            <path d="M7 9.2v6a2.4 2.4 0 0 0 2.4 2.4h3.4"/>
+          </svg>
+        </div>
+        <h3 class="tile__title">Put AI agents to work</h3>
+        <p class="tile__body">Design agents that handle complex, multi-step workflows autonomously — real automation, not just another chatbot.</p>
+      </article>
+
+      <!-- 03 — briefcase: something you carry out with you -->
+      <article class="tile reveal" style="--delay:120ms">
+        <div class="tile__icon i-yellow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2.8" y="7.2" width="18.4" height="12.4" rx="2.6"/>
+            <path d="M8.8 7.2V5.8a2 2 0 0 1 2-2h2.4a2 2 0 0 1 2 2v1.4"/>
+            <path d="M2.8 12.6h18.4"/>
+          </svg>
+        </div>
+        <h3 class="tile__title">Build a portfolio project</h3>
+        <p class="tile__body">Build a working AI product to demo in interviews and showcase in your portfolio.</p>
+      </article>
+
+      <!-- 04 — two figures: mentorship -->
+      <article class="tile reveal" style="--delay:180ms">
+        <div class="tile__icon i-green" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3.2"/>
+            <path d="M3.4 19.6c0-3 2.5-5.4 5.6-5.4s5.6 2.4 5.6 5.4"/>
+            <path d="M16.2 5.3a3.2 3.2 0 0 1 0 5.9"/>
+            <path d="M17.6 14.7c1.9.7 3.1 2.5 3.1 4.9"/>
+          </svg>
+        </div>
+        <h3 class="tile__title">Google mentors</h3>
+        <p class="tile__body">Your team is mentored by people from Google to refine your ideas into a high-impact product.</p>
+      </article>
+
+      <!-- 05 — compass: choosing a direction under trade-offs -->
+      <article class="tile reveal">
+        <div class="tile__icon i-blue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="8.8"/>
+            <path d="M15.7 8.3l-2.1 5.3-5.3 2.1 2.1-5.3 5.3-2.1Z"/>
+          </svg>
+        </div>
+        <h3 class="tile__title">Design like a PM</h3>
+        <p class="tile__body">Scope real problems, weigh trade-offs, and make key decisions that turn ideas into viable products.</p>
+      </article>
+
+      <!-- 06 — magnifier: watching real people use it -->
+      <article class="tile reveal" style="--delay:60ms">
+        <div class="tile__icon i-red" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="10.6" cy="10.6" r="6.6"/>
+            <path d="M15.4 15.4 20.6 20.6"/>
+          </svg>
+        </div>
+        <h3 class="tile__title">Test with real users</h3>
+        <p class="tile__body">Run usability tests, gather user feedback, and iterate using proven research loops.</p>
+      </article>
+
+      <!-- 07 — presentation board: making the case out loud -->
+      <article class="tile reveal" style="--delay:120ms">
+        <div class="tile__icon i-yellow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3.6" width="18" height="12.2" rx="2.2"/>
+            <path d="M12 15.8v4.6M8.6 20.4h6.8"/>
+            <path d="M7.6 11.8l2.8-3 2.4 2.4 3.6-4"/>
+          </svg>
+        </div>
+        <h3 class="tile__title">Win any room</h3>
+        <p class="tile__body">Pitch your ideas with clarity and confidence to convince teammates, users, and executives alike.</p>
+      </article>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     DEMO DAY
+     Promoted out of the outcomes grid: it's an event, not a skill, and
+     it doesn't complete the "By the end, you'll be able to:" sentence
+     the cards finish. Its own section, with a photo carrying the weight.
+     ============================================================ -->
+<section class="sec" id="demo-day">
+  <div class="wrap">
+    <div class="demo reveal">
+      <div class="demo__text">
+        <h2 class="h2">Demo day</h2>
+        <p class="lede" style="margin-top:20px">Present your final product to leaders from Google, industry, and NGOs. In past iterations, we’ve hosted it at Google’s Kitchener office.</p>
+      </div>
+      <!-- swap for <img class="demo__photo" src="…" alt="Students presenting at demo day"> -->
+      <div class="demo__media">
+        <div class="demo__ph">[photo — demo day at Google Kitchener]</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TESTIMONIALS
+     ============================================================ -->
+<section class="sec" id="stories">
+  <!-- faint accent aura -->
+  <div class="aura-field" data-parallax data-speed="0.06" aria-hidden="true">
+    <div class="aura-anchor" style="--x:12%;--y:44%;--s:clamp(280px,32vw,520px)">
+      <div class="aura aura--blue" style="--o:.18;--b:100px;--d:22s"></div>
+    </div>
+    <div class="aura-anchor" style="--x:90%;--y:58%;--s:clamp(260px,28vw,460px)">
+      <div class="aura aura--yellow aura--drift-b" style="--o:.17;--b:100px;--d:18s"></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="center">
+      <span class="section-label reveal">Testimonials</span>
+      <!-- DRAFT heading — replace with your own line -->
+      <h2 class="h2 measure-sm reveal" style="--delay:80ms">From students who started exactly where you are</h2>
+    </div>
+
+    <!-- Quotes are verbatim. Swap each .avatar for
+         <img class="avatar" src="…" alt=""> — alt stays empty, the name
+         next to it already identifies the person. -->
+    <div class="grid-quotes">
+
+      <figure class="quote quote--feature reveal" style="margin:0">
+        <span class="quote__mark" aria-hidden="true">“</span>
+        <blockquote class="quote__text" style="margin:0">I just finished my recruiting cycle for co-op jobs, and I had seven interviews — and in all seven I was able to talk about Futures Lab. Employers were looking for someone who could demonstrably say: ‘Here’s something I built with AI. Here’s how it works. I understand how to do this in a team setting.’</blockquote>
+        <figcaption class="quote__foot">
+          <div class="quote__person">
+            <img class="avatar" src="media/erin_walshaw.jpeg" alt="" width="42" height="42" loading="lazy">
+            <div>
+              <p class="quote__name">Erin Walshaw</p>
+              <p class="quote__role">BMath, Computer Science</p>
+            </div>
+          </div>
+          <p class="quote__project" style="--dot:var(--blue)">Built Logic Labyrinth</p>
+        </figcaption>
+      </figure>
+
+      <figure class="quote reveal" style="margin:0;--delay:80ms">
+        <span class="quote__mark" aria-hidden="true">“</span>
+        <blockquote class="quote__text" style="margin:0">I have no clue how to code, and yet I came up with a fully functional app — because I was smart with giving prompts.</blockquote>
+        <figcaption class="quote__foot">
+          <div class="quote__person">
+            <img class="avatar" src="media/lara_azad.jpeg" alt="" width="42" height="42" loading="lazy">
+            <div>
+              <p class="quote__name">Lara Azad</p>
+              <p class="quote__role">Master of Digital Experience Innovation</p>
+            </div>
+          </div>
+          <button type="button" class="quote__project" style="--dot:var(--red)"
+                  data-project="Kanji Garden" data-by="Lara Azad"
+                  data-shot="media/kanji_garden.png">Built Kanji Garden <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 2H2.8A.8.8 0 0 0 2 2.8V13.2a.8.8 0 0 0 .8.8H13.2a.8.8 0 0 0 .8-.8V10M9.5 2H14v4.5M14 2 7.5 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </figcaption>
+      </figure>
+
+      <figure class="quote reveal" style="margin:0;--delay:160ms">
+        <span class="quote__mark" aria-hidden="true">“</span>
+        <blockquote class="quote__text" style="margin:0">I show off to all my friends that I know how to do this now — none of them do. I want to go into marketing in health, and now I can build a portfolio on my own instead of using Canva.</blockquote>
+        <figcaption class="quote__foot">
+          <div class="quote__person">
+            <img class="avatar" src="media/madison_de_silva.jpeg" alt="" width="42" height="42" loading="lazy">
+            <div>
+              <p class="quote__name">Madison De Silva</p>
+              <p class="quote__role">BA, Sociology</p>
+            </div>
+          </div>
+          <p class="quote__project" style="--dot:var(--green)">Built Focus Flow</p>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     METRICS / PROOF
+     ============================================================ -->
+<section class="sec" id="metrics">
+  <!-- the section was flat white; two faint auras give it the same
+       atmosphere as the hero without competing with the data marks -->
+  <div class="aura-field" data-parallax data-speed="0.05" aria-hidden="true">
+    <div class="aura-anchor" style="--x:20%;--y:26%;--s:clamp(300px,42vw,720px)">
+      <div class="aura aura--blue" style="--o:.16;--b:120px;--d:19s"></div>
+    </div>
+    <div class="aura-anchor" style="--x:82%;--y:64%;--s:clamp(280px,36vw,620px)">
+      <div class="aura aura--green aura--drift-b" style="--o:.14;--b:130px;--d:22s"></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="center">
+      <span class="section-label reveal">WHO SHOWS UP</span>
+      <h2 class="h2 measure-sm reveal" style="--delay:80ms">Students from everywhere. Building real things.</h2>
+    </div>
+
+    <!-- (a) pictograph + hero stat -->
+    <div class="metric-block picto reveal" style="margin-top:clamp(44px,6vw,72px)">
+      <div class="picto__figures" data-lit aria-hidden="true">
+        <svg class="on" viewBox="0 0 24 40" style="--fill:var(--blue);--d:0ms"><use href="#figure"/></svg>
+        <svg class="on" viewBox="0 0 24 40" style="--fill:var(--red);--d:80ms"><use href="#figure"/></svg>
+        <svg class="on" viewBox="0 0 24 40" style="--fill:var(--yellow);--d:160ms"><use href="#figure"/></svg>
+        <svg class="on" viewBox="0 0 24 40" style="--fill:var(--green);--d:240ms"><use href="#figure"/></svg>
+        <svg class="on" viewBox="0 0 24 40" style="--fill:var(--blue);--d:320ms"><use href="#figure"/></svg>
+        <svg class="on" viewBox="0 0 24 40" style="--fill:var(--red);--d:400ms"><use href="#figure"/></svg>
+        <svg viewBox="0 0 24 40"><use href="#figure"/></svg>
+        <svg viewBox="0 0 24 40"><use href="#figure"/></svg>
+        <svg viewBox="0 0 24 40"><use href="#figure"/></svg>
+        <svg viewBox="0 0 24 40"><use href="#figure"/></svg>
+      </div>
+      <div class="picto__readout">
+        <p class="big-number"><span data-count="6" data-suffix=" in 10">6 in 10</span></p>
+        <p class="big-number__label">built their first app here</p>
+      </div>
+    </div>
+
+    <!-- (b) proof band -->
+    <div class="metric-block stat-band reveal">
+      <div>
+        <p class="stat__num" data-count="97" data-suffix="">97</p>
+        <p class="stat__label">students trained, and counting</p>
+      </div>
+      <div>
+        <p class="stat__num" data-count="50" data-suffix="+">50+</p>
+        <p class="stat__label">Net Promoter Score</p>
+      </div>
+      <div>
+        <p class="stat__num" data-count="30" data-suffix="+">30+</p>
+        <p class="stat__label">prototypes shipped</p>
+      </div>
+    </div>
+
+    <!-- (c) who's in the room -->
+    <div class="metric-block">
+      <p class="section-label room__label reveal">Every faculty in the room</p>
+
+      <ul class="chips">
+          <li class="chip reveal" style="--dot:var(--blue);--delay:0ms">Arts</li>
+          <li class="chip reveal" style="--dot:var(--red);--delay:60ms">Engineering</li>
+          <li class="chip reveal" style="--dot:var(--green);--delay:120ms">Environment</li>
+          <li class="chip reveal" style="--dot:var(--yellow);--delay:180ms">Health</li>
+          <li class="chip reveal" style="--dot:var(--blue);--delay:240ms">Math</li>
+          <li class="chip reveal" style="--dot:var(--green);--delay:300ms">Science</li>
+      </ul>
+
+      <!-- track holds the list twice so translate(-50%) loops seamlessly;
+           the duplicate is aria-hidden so it isn't read out again -->
+      <div class="marquee">
+        <div class="marquee__track">
+          <ul class="marquee__list">
+            <li>Horticulture & Landscape Architecture</li>
+            <li>Sociology & Legal Studies</li>
+            <li>Public Health</li>
+            <li>Communication Arts & Design</li>
+            <li>Cognitive Neuroscience</li>
+            <li>Knowledge Integration</li>
+            <li>Liberal Studies</li>
+            <li>Psychology</li>
+            <li>Accounting & Financial Management</li>
+            <li>Global Business & Digital Arts</li>
+            <li>Social & Ecological Sustainability</li>
+            <li>Arts & Business</li>
+            <li>Chemistry</li>
+            <li>Statistics</li>
+            <li>Biomedical Engineering</li>
+            <li>Mechatronics Engineering</li>
+            <li>Systems Design Engineering</li>
+            <li>Environment & Business</li>
+            <li>Management Science</li>
+            <li>Data Science</li>
+            <li>Software Engineering</li>
+            <li>Computer Science</li>
+            <li>Mathematics</li>
+            <li>Digital Experience & Innovation</li>
+          </ul>
+          <ul class="marquee__list marquee__dup" aria-hidden="true">
+            <li>Horticulture & Landscape Architecture</li>
+            <li>Sociology & Legal Studies</li>
+            <li>Public Health</li>
+            <li>Communication Arts & Design</li>
+            <li>Cognitive Neuroscience</li>
+            <li>Knowledge Integration</li>
+            <li>Liberal Studies</li>
+            <li>Psychology</li>
+            <li>Accounting & Financial Management</li>
+            <li>Global Business & Digital Arts</li>
+            <li>Social & Ecological Sustainability</li>
+            <li>Arts & Business</li>
+            <li>Chemistry</li>
+            <li>Statistics</li>
+            <li>Biomedical Engineering</li>
+            <li>Mechatronics Engineering</li>
+            <li>Systems Design Engineering</li>
+            <li>Environment & Business</li>
+            <li>Management Science</li>
+            <li>Data Science</li>
+            <li>Software Engineering</li>
+            <li>Computer Science</li>
+            <li>Mathematics</li>
+            <li>Digital Experience & Innovation</li>
+          </ul>
+        </div>
+      </div>
+      <p class="room__note reveal">…and more — Alumni from +32 programs</p>
+
+      <div class="levels reveal" data-grow>
+        <div class="segbar" role="img"
+             aria-label="Cohort by level: undergraduate 68%, master's 24%, PhD 8%">
+          <span style="--w:68%;--d:0ms;background:var(--blue)"></span>
+          <span style="--w:24%;--d:120ms;background:var(--yellow)"></span>
+          <span style="--w:8%;--d:240ms;background:var(--green)"></span>
+        </div>
+        <ul class="seg-legend">
+          <li><i style="background:var(--blue)"></i><b>68%</b> Undergrad</li>
+          <li><i style="background:var(--yellow)"></i><b>24%</b> Master’s</li>
+          <li><i style="background:var(--green)"></i><b>8%</b> PhD</li>
+        </ul>
+        <p class="levels__caption">Every level, side by side.</p>
+      </div>
+    </div>
+
+    <!-- (d) kicker -->
+    <p class="kicker reveal">Come as you are — from computer science to horticulture, first-year to PhD.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     APPLY
+     ============================================================ -->
+<section class="sec" id="apply">
+  <div class="wrap">
+    <div class="center">
+      <span class="section-label reveal">Apply</span>
+      <h2 class="h2 measure-sm reveal" style="--delay:80ms">Curiosity is the only prerequisite.</h2>
+    </div>
+
+    <!-- prose explains, the panel is for scanning — people hunting for
+         dates and cost shouldn't have to read paragraphs to find them -->
+    <div class="apply reveal">
+      <div class="apply__prose">
+        <h3 class="h3">Who we’re looking for</h3>
+        <p class="body">We’re looking for creative, high-agency people who want to build the tools for the future of work and learning — from any program, at any level. <strong>No experience with coding or AI is required — and it won’t give you an advantage, either.</strong> We just want to get to know you.</p>
+
+        <h3 class="h3">What the application asks</h3>
+        <p class="body"><strong>Show us your trajectory.</strong> What you're curious about, what you've built or led, the things you throw yourself into. Tell us about your studies, your work or co-op experience, your extracurriculars and hobbies, and take on a few open questions. We're looking for creativity, drive, and proof that you make things happen.</p>
+      </div>
+
+      <aside class="apply__facts">
+        <dl class="facts">
+          <div>
+            <dt>When</dt>
+            <dd>Fridays, Oct 2 – Nov 27, 2026
+              <span class="facts__note">No session on reading week — 8 sessions</span>
+            </dd>
+          </div>
+          <div><dt>Time</dt><dd>11:00 AM – 1:30 PM</dd></div>
+          <div><dt>Where</dt><dd>Pearl Sullivan Engineering Building (E7) Ideas Clinic (Room 2409), University of Waterloo</dd></div>
+          <div><dt>Cost</dt><dd>Free</dd></div>
+          <div><dt>Apply by</dt><dd>September 18, 2026</dd></div>
+        </dl>
+      </aside>
+    </div>
+
+    <!-- terminal action: the only link on the page that leaves it -->
+    <div class="center apply__cta reveal">
+      <a class="btn btn--primary btn--lg"
+         href="https://docs.google.com/forms/d/e/1FAIpQLSe1zyd8ejtaxyIRl6baYpHAFiZ0aMiMkUVSo8mA4rLaWBKpRQ/viewform"
+         target="_blank" rel="noopener noreferrer">
+        Apply for Fall 2026
+        <svg class="btn__arrow" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <p class="apply-note">Applications close September 18</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PARTNER / ORGANIZATION CTA
+     ============================================================ -->
+<section class="sec sec--tight" id="partners">
+  <div class="wrap">
+    <div class="partner reveal">
+      <!-- the contrasting band: all four colours, a touch richer than the
+           ambient section auras so this closing CTA carries visual weight -->
+      <div class="aura-field" aria-hidden="true" style="inset:-30%">
+        <div class="aura-anchor" style="--x:20%;--y:36%;--s:clamp(280px,38vw,600px)">
+          <div class="aura aura--blue" style="--o:.24;--b:105px;--d:20s"></div>
+        </div>
+        <div class="aura-anchor" style="--x:80%;--y:32%;--s:clamp(260px,34vw,540px)">
+          <div class="aura aura--red aura--drift-b" style="--o:.22;--b:110px;--d:17s"></div>
+        </div>
+        <div class="aura-anchor" style="--x:38%;--y:74%;--s:clamp(260px,34vw,540px)">
+          <div class="aura aura--yellow" style="--o:.22;--b:105px;--d:23s"></div>
+        </div>
+        <div class="aura-anchor" style="--x:74%;--y:72%;--s:clamp(260px,34vw,540px)">
+          <div class="aura aura--green aura--drift-b" style="--o:.22;--b:115px;--d:24s"></div>
+        </div>
+      </div>
+
+      <div class="partner__inner">
+        <span class="section-label">For universities</span>
+        <h2 class="h2 measure-sm">Bring Futures Lab to your campus</h2>
+        <p class="lede measure" style="margin-top:18px">
+          The University of Waterloo and Google are expanding Futures Lab to institutions
+          everywhere. We’re inviting universities to bring the program to their own students.
+        </p>
+        <!-- institution pre-registration — a different form from the
+             student application -->
+        <a class="btn btn--primary btn--lg" style="margin-top:32px"
+           href="https://docs.google.com/forms/d/e/1FAIpQLSeQ2SbzMJsO0DWjIFaJXpo8jrqUZCBWIyBaYOcnNcUggms3vA/viewform"
+           target="_blank" rel="noopener noreferrer">
+          Pre-register your institution
+          <svg class="btn__arrow" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <p class="partner__note">No commitment — we’ll be in touch as new cohorts open</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<!-- Minimal colophon, not a footer: no social, no nav (the sticky nav
+     already covers wayfinding). Just closes the page with attribution. -->
+<footer class="colophon">
+  <div class="wrap colophon__inner">
+    <!-- rest state from the start — the bloom gesture plays once, in the nav -->
+    <a class="brand is-bloomed" href="#top">
+      <span class="brand-mark" aria-hidden="true">&gt;<span class="brand-mark__slot"><span class="brand-mark__cursor"></span><svg class="brand-mark__spark" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></span></span>
+      Futures Lab
+    </a>
+    <p class="colophon__meta">A collaboration between the University of Waterloo and Google · © 2026</p>
+  </div>
+</footer>
+
+<!-- Prototype viewer. Native <dialog> so Esc, focus trapping and
+     focus-return come from the platform rather than hand-rolled JS. -->
+<dialog class="shot" id="shot" aria-labelledby="shotTitle">
+  <div class="shot__inner">
+    <div class="shot__ph" id="shotBody">[screenshot of the prototype]</div>
+    <div class="shot__bar">
+      <div>
+        <p class="shot__title" id="shotTitle"></p>
+        <p class="shot__by" id="shotBy"></p>
+      </div>
+      <button class="shot__close" id="shotClose" type="button" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- sticky nav: blur + lift once scrolled ---- */
+  var nav = document.getElementById('nav');
+  function syncNav() { nav.classList.toggle('is-scrolled', window.scrollY > 8); }
+  syncNav();
+
+  /* ---- scroll progress ---- */
+  var progress = document.getElementById('scrollProgress');
+  function syncProgress() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var p = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+    progress.style.setProperty('--p', p.toFixed(4));
+  }
+
+  /* ---- scrollspy ----
+     rootMargin collapses the viewport to a band around the middle, so the
+     active link is whichever section is actually centred in view rather
+     than whichever merely touches the edge. */
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav__links a'));
+  var spied = navLinks
+    .map(function (a) { return { link: a, sec: document.querySelector(a.getAttribute('href')) }; })
+    .filter(function (o) { return o.sec; });
+
+  function setActive(link) {
+    spied.forEach(function (o) {
+      o.link.setAttribute('aria-current', o.link === link ? 'true' : 'false');
+    });
+  }
+  if (spied.length && 'IntersectionObserver' in window) {
+    var visible = new Set();
+    var spyIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target);
+      });
+      // topmost section in the band wins, so order stays stable
+      var current = spied.filter(function (o) { return visible.has(o.sec); })[0];
+      setActive(current ? current.link : null);
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    spied.forEach(function (o) { spyIO.observe(o.sec); });
+  }
+
+  /* ---- scroll reveals ---- */
+  var reveals = document.querySelectorAll('.reveal');
+  if (reduced || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (el) { el.classList.add('is-in'); });
+  } else {
+    var revealIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('is-in');
+        revealIO.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.12 });
+    reveals.forEach(function (el) { revealIO.observe(el); });
+  }
+
+  /* ---- count-up on enter ---- */
+  var counters = document.querySelectorAll('[data-count]');
+  function countUp(el) {
+    var target = parseFloat(el.dataset.count);
+    var suffix = el.dataset.suffix || '';
+    if (reduced) { el.textContent = target + suffix; return; }
+    var dur = 1400, start = null;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if (!('IntersectionObserver' in window)) {
+    counters.forEach(countUp);
+  } else {
+    var countIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        countUp(e.target);
+        countIO.unobserve(e.target);
+      });
+    }, { threshold: 0.55 });
+    counters.forEach(function (el) { countIO.observe(el); });
+  }
+
+  /* ---- aura parallax ----
+     Measured once with --py cleared, so the element's own transform
+     never feeds back into the next measurement. */
+  var fields = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));
+  function measure() {
+    fields.forEach(function (el) {
+      el.style.setProperty('--py', '0px');
+      var r = el.getBoundingClientRect();
+      el._mid = r.top + window.scrollY + r.height / 2;
+    });
+  }
+  function applyParallax() {
+    var viewMid = window.scrollY + window.innerHeight / 2;
+    fields.forEach(function (el) {
+      var speed = parseFloat(el.dataset.speed) || 0.08;
+      el.style.setProperty('--py', (-(viewMid - el._mid) * speed).toFixed(1) + 'px');
+    });
+  }
+
+  /* ---- brand mark: type→bloom, once ----
+     blink twice, then bloom and rest. Under reduced motion the bloom is
+     skipped and the rest state (> ✦) shows immediately. With no JS at
+     all the mark stays at "> _" — the prompt-before-typing state. */
+  (function () {
+    var brand = document.getElementById('navBrand');
+    if (!brand) return;
+    var cursor = brand.querySelector('.brand-mark__cursor');
+    if (reduced || !cursor) { brand.classList.add('is-bloomed'); return; }
+    [420, 670, 970, 1220].forEach(function (ms, i) {
+      setTimeout(function () { cursor.style.opacity = i % 2 ? '1' : '0'; }, ms);
+    });
+    setTimeout(function () {
+      // clear the inline opacity the blink left behind, or it outranks
+      // the .is-bloomed rule and the cursor stays visible under the spark
+      cursor.style.opacity = '';
+      brand.classList.add('is-bloomed');
+    }, 1560);
+  })();
+
+  /* ---- one-shot "arm on entry" toggles ----
+     pictograph fill and the level bar both just need a class when they
+     reach the viewport; the CSS owns the timing and stagger. Under
+     reduced motion the transitions are absent, so adding the class
+     still lands on the correct final state instantly. */
+  [['[data-lit]', 'is-lit'], ['[data-grow]', 'is-grown']].forEach(function (pair) {
+    var els = Array.prototype.slice.call(document.querySelectorAll(pair[0]));
+    if (!els.length) return;
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(function (el) { el.classList.add(pair[1]); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add(pair[1]);
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.4 });
+    els.forEach(function (el) { io.observe(el); });
+  });
+
+  /* ---- prototype viewer ----
+     data-shot on a pill means a real screenshot exists; without it the
+     dialog shows the placeholder, so this works before the images land. */
+  (function () {
+    var dlg = document.getElementById('shot');
+    if (!dlg || typeof dlg.showModal !== 'function') return;
+    var body  = document.getElementById('shotBody');
+    var title = document.getElementById('shotTitle');
+    var by    = document.getElementById('shotBy');
+
+    document.querySelectorAll('button.quote__project').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var project = btn.dataset.project || '';
+        var src = btn.dataset.shot;
+        title.textContent = project;
+        by.textContent = btn.dataset.by ? 'Built by ' + btn.dataset.by : '';
+        var next;
+        if (src) {
+          next = document.createElement('img');
+          next.className = 'shot__img';
+          next.src = src;
+          next.alt = 'Screenshot of ' + project;
+        } else {
+          next = document.createElement('div');
+          next.className = 'shot__ph';
+          next.textContent = '[screenshot of ' + project + ']';
+        }
+        next.id = 'shotBody';
+        body.replaceWith(next);
+        body = next;
+        dlg.showModal();
+      });
+    });
+
+    document.getElementById('shotClose').addEventListener('click', function () { dlg.close(); });
+    /* Backdrop dismiss on mousedown, not click: showModal() runs inside
+       the pill's click, and that same click then lands on the newly-open
+       dialog and shuts it again. The opening mousedown hit the pill
+       before the dialog existed, so mousedown can't misfire that way. */
+    dlg.addEventListener('mousedown', function (e) {
+      if (e.target === dlg) dlg.close();
+    });
+  })();
+
+  /* ---- hero gallery: video facade + photos ---- */
+  (function () {
+    var gallery = document.getElementById('gallery');
+    if (!gallery) return;
+
+    var VIDEO_ID = 'mYJ_G5MH0vU';
+    var VIDEO_TITLE = 'Futures Lab Waterloo x Google';
+
+    var track  = gallery.querySelector('.gallery__track');
+    var slides = Array.prototype.slice.call(gallery.querySelectorAll('.slide'));
+    var prev   = gallery.querySelector('.gallery__arrow--prev');
+    var next   = gallery.querySelector('.gallery__arrow--next');
+    var dotsEl = gallery.querySelector('.gallery__dots');
+    var status = document.getElementById('galleryStatus');
+    var playBtn = document.getElementById('playBtn');
+    var videoSlide = slides[0];
+    var index = 0;
+
+    // dots are generated so adding a slide above needs no other edit
+    var dots = slides.map(function (_, i) {
+      var d = document.createElement('button');
+      d.type = 'button';
+      d.className = 'dot';
+      d.setAttribute('aria-label', 'Go to item ' + (i + 1) + ' of ' + slides.length);
+      d.setAttribute('aria-current', i === 0 ? 'true' : 'false');
+      d.addEventListener('click', function () { go(i); });
+      dotsEl.appendChild(d);
+      return d;
+    });
+
+    // dropping the iframe also stops the audio — no player API needed
+    function teardownVideo() {
+      var frame = videoSlide.querySelector('.slide__frame');
+      if (frame) frame.remove();
+    }
+
+    function playVideo() {
+      if (videoSlide.querySelector('.slide__frame')) return;
+      var frame = document.createElement('iframe');
+      // autoplay=1 is safe here: it follows a real click, so no browser blocks it
+      frame.src = 'https://www.youtube-nocookie.com/embed/' + VIDEO_ID +
+                  '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+      frame.className = 'slide__frame';
+      frame.title = VIDEO_TITLE;
+      frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      frame.allowFullscreen = true;
+      videoSlide.appendChild(frame);
+    }
+
+    function go(i) {
+      index = Math.max(0, Math.min(i, slides.length - 1));
+      track.style.transform = 'translate3d(' + (-index * 100) + '%,0,0)';
+      slides.forEach(function (s, n) {
+        if (n === index) s.removeAttribute('inert');
+        else s.setAttribute('inert', '');
+      });
+      dots.forEach(function (d, n) {
+        d.setAttribute('aria-current', n === index ? 'true' : 'false');
+      });
+      prev.disabled = index === 0;
+      next.disabled = index === slides.length - 1;
+      if (index !== 0) teardownVideo();
+      status.textContent = 'Item ' + (index + 1) + ' of ' + slides.length +
+                           (index === 0 ? ': the film' : '');
+    }
+
+    playBtn.addEventListener('click', playVideo);
+    prev.addEventListener('click', function () { go(index - 1); });
+    next.addEventListener('click', function () { go(index + 1); });
+
+    gallery.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft')  { go(index - 1); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { go(index + 1); e.preventDefault(); }
+    });
+
+    var startX = null;
+    gallery.addEventListener('touchstart', function (e) {
+      startX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    gallery.addEventListener('touchend', function (e) {
+      if (startX === null) return;
+      var dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 45) go(index + (dx < 0 ? 1 : -1));
+      startX = null;
+    }, { passive: true });
+
+    go(0);
+  })();
+
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      syncNav();
+      syncProgress();
+      if (!reduced) applyParallax();
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  syncProgress();
+
+  if (!reduced) {
+    measure();
+    applyParallax();
+    var rt;
+    window.addEventListener('resize', function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () { measure(); applyParallax(); }, 160);
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>
