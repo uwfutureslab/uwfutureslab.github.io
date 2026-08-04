@@ -478,7 +478,11 @@ strong{font-weight:500;color:var(--ink)}
 }
 .demo__media{position:relative}
 .demo__photo,.demo__ph{
-  width:100%;aspect-ratio:4/3;
+  /* height:auto is load-bearing — the <img> carries width/height attributes
+     (they prevent layout shift), and without this the attribute height wins
+     as a presentational hint, aspect-ratio is ignored, and object-fit:cover
+     crops the photo to a tall narrow strip. */
+  width:100%;height:auto;aspect-ratio:4/3;
   border-radius:var(--r-md);
   box-shadow:var(--sh-2);
 }
@@ -901,11 +905,29 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
             </button>
           </li>
 
-          <!-- swap each .slide__ph for <img class="slide__poster" loading="lazy" src="…" alt="…"> -->
-          <li class="slide" inert><div class="slide__ph">[photo 01]</div></li>
-          <li class="slide" inert><div class="slide__ph">[photo 02]</div></li>
-          <li class="slide" inert><div class="slide__ph">[photo 03]</div></li>
-          <li class="slide" inert><div class="slide__ph">[photo 04]</div></li>
+          <!-- Winter 2026 cohort, demo day at Google Kitchener (2026-03-27).
+               Ordered people-first: the two candid shots lead, the two
+               stage-and-slide shots close. -->
+          <li class="slide" inert>
+            <img class="slide__poster" width="1920" height="1080" loading="lazy"
+                 src="media/carousel-1-demo-station.jpg"
+                 alt="Two students flexing their arms beside the monitor showing their MuscleMemory prototype at their demo station.">
+          </li>
+          <li class="slide" inert>
+            <img class="slide__poster" width="1920" height="1080" loading="lazy"
+                 src="media/carousel-2-g1nius.jpg"
+                 alt="A student presenting the G1NIUS driving-test prototype on stage at Google’s Kitchener office.">
+          </li>
+          <li class="slide" inert>
+            <img class="slide__poster" width="1920" height="1080" loading="lazy"
+                 src="media/carousel-3-elix.jpg"
+                 alt="A student presenting the ELIX teach-to-learn prototype to the symposium audience.">
+          </li>
+          <li class="slide" inert>
+            <img class="slide__poster" width="1920" height="1080" loading="lazy"
+                 src="media/carousel-4-musclememory.jpg"
+                 alt="A student presenting the MuscleMemory AI fitness-coaching prototype on stage.">
+          </li>
 
         </ul>
 
@@ -1064,9 +1086,10 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
         <h2 class="h2">Demo day</h2>
         <p class="lede" style="margin-top:20px">Present your final product to leaders from Google, industry, and NGOs. In past iterations, we’ve hosted it at Google’s Kitchener office.</p>
       </div>
-      <!-- swap for <img class="demo__photo" src="…" alt="Students presenting at demo day"> -->
       <div class="demo__media">
-        <div class="demo__ph">[photo — demo day at Google Kitchener]</div>
+        <img class="demo__photo" width="1200" height="900" loading="lazy"
+             src="media/demo-day.jpg"
+             alt="Three students laughing together as they demo their prototype on a laptop at Google’s Kitchener office.">
       </div>
     </div>
   </div>
