@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>Futures Lab</title>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <script src="libraries/p5.min.js"></script>
+    <script src="libraries/p5.sound.min.js"></script>
+    <script src="libraries/gsap.min.js"></script>
+    <script src="/deprecated/script.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Playwrite+US+Modern&display=swap" rel="stylesheet">
+   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <nav>
+      <a href="/deprecated/"><p class="title">Futures Lab</p></a>
+      <div class="dropdowns">
+        <div class="nav-element">
+          <a href="#">workshops</a>
+          <div class="nav-hover nav-front lab">
+            <a href="/deprecated/offerings/f25/">Fall 2025</a>
+            <a href="/deprecated/offerings/w26/">Winter 2026 </a>
+          </div>
+        </div>
+        <div class="nav-element">
+          <a href="#">symposia</a>
+          <div class="nav-hover nav-front lab">
+            <a href="/deprecated/symposium/f25/">Fall 2025</a>
+            <!--a href="/deprecated/symposium/w26/">winter 2026</a-->
+          </div>
+        </div>
+      </div>
+      <div id="menu">
+        <!-- this is the mobile menu-->
+        <button onclick="handleMenu()"><p id="menu-icon">☰</p></button>
+        <div id="menu-dropdown" style="display: none;">
+          <a href="/deprecated/offerings/f25/">Fall 2025 Workshop</a>
+           <a href="/deprecated/offerings/w26/">Winter 2026 Workshop</a>
+          <a href="/deprecated/symposium/f25/">Fall 2025 Symposium</a>
+        </div>
+      </div>
+    </nav>
+    <div style="touch-action: none;" id="p5sketch"><script src="sketch.js"></script></div>
+    <noscript>
+      <h1>Futures Lab: An AI+UX Prototyping Workshop Series</h1>
+      <!--p>Fall 2025: "Learning Re-Imagined"</p-->
+    </noscript>
+    <div id="maincontent">
+      <p>Sponsored by Google and led by Prof. Edith Law at University of Waterloo, Futures Lab is an AI+UX prototyping workshop that invites university students from all disciplines to explore <strong>how emerging AI technologies can reshape the way we learn and work</strong>.</p>
+      <p>For Fall 2025, the theme is <a href="/deprecated/offerings/f25/">“Learning Re-Imagined”.</a> Information about the Fall 2025 symposium can be found on the <a href="#">symposium details page</a>.</p>
+      <h3>In these workshops, students will:</h3>
+      <ul>
+        <li>learn to prototype with cutting-edge GenAI tools and latest industry methods</li>
+        <li>apply innovative problem solving to real-life, societal challenges</li>
+        <li>collaborate in interdisciplinary teams to meet the needs of stakeholders</li>
+        <li>develop solutions to augment their portfolio</li>
+        <li>have the opportunity to further develop their project after the workshop, via research, open-source project or a new venture</li>
+        <li>receive a certificate of completion</li>
+      </ul>
+      <p><strong>Interested in participating?</strong> Apply to be in our <a href="/deprecated/offerings/w26">Winter 2026</a> Futures Lab cohort!</p>
+    </div>
+  </body>
+</html>
