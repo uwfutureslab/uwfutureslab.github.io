@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Futures Lab</title>
+<title>Futures Lab: Agents at Work | University of Waterloo × Google</title>
+<meta name="description" content="Futures Lab is a free, eight-week hands-on AI workshop at the University of Waterloo, run with Google. Any program, any level — no coding experience needed.">
 <link rel="icon" type="image/svg+xml" href="media/futures-lab-mark.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="media/favicon-32.png">
 <link rel="apple-touch-icon" href="media/apple-touch-icon.png">
@@ -19,6 +20,10 @@
 :root{
   /* Google accent palette — used in auras + accents, never as flat fills */
   --blue:#4285F4;
+  /* Interactive surfaces only. White on --blue is 3.6:1, under the 4.5:1
+     WCAG AA floor for body-size text. Google Blue 600 clears it; the mark,
+     auras and accents keep the original --blue. */
+  --blue-action:#1a73e8;
   --red:#EA4335;
   --yellow:#FBBC05;
   --green:#34A853;
@@ -79,7 +84,19 @@ body{
 img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:4px}
+:focus-visible{outline:2px solid var(--blue-action);outline-offset:3px;border-radius:4px}
+
+/* Keyboard users land here first; it stays off-screen until focused so it
+   costs the visual design nothing. */
+.skip-link{
+  position:fixed;left:50%;top:0;z-index:200;
+  transform:translate(-50%,-130%);
+  background:var(--surface);color:var(--ink);
+  padding:12px 24px;border-radius:0 0 var(--r-sm) var(--r-sm);
+  box-shadow:var(--sh-2);font-size:.9375rem;font-weight:500;
+  transition:transform .2s cubic-bezier(.2,.7,.2,1);
+}
+.skip-link:focus{transform:translate(-50%,0)}
 
 /* ============================================================
    LAYOUT PRIMITIVES
@@ -239,8 +256,8 @@ strong{font-weight:500;color:var(--ink)}
   font-size:.9375rem;font-weight:500;letter-spacing:-.005em;
   transition:transform .22s cubic-bezier(.2,.7,.2,1), box-shadow .22s, background-color .22s;
 }
-.btn--primary{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(66,133,244,.24)}
-.btn--primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(66,133,244,.34)}
+.btn--primary{background:var(--blue-action);color:#fff;box-shadow:0 2px 8px rgba(26,115,232,.24)}
+.btn--primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(26,115,232,.34)}
 .btn--ghost{background:rgba(255,255,255,.86);color:var(--ink);box-shadow:var(--sh-1)}
 .btn--ghost:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
 .btn--sm{padding:10px 20px;font-size:.875rem}
@@ -396,15 +413,22 @@ strong{font-weight:500;color:var(--ink)}
 .gallery__arrow--prev{left:16px}
 .gallery__arrow--next{right:16px}
 
-.gallery__dots{display:flex;justify-content:center;gap:9px;margin-top:20px}
+.gallery__dots{display:flex;justify-content:center;gap:2px;margin-top:14px}
+/* The button is a 24x24 hit area (WCAG 2.5.8); ::before carries the 8px
+   dot, so the target grew without the design changing. */
 .dot{
-  width:8px;height:8px;border-radius:50%;padding:0;
+  width:24px;height:24px;padding:0;background:none;
+  display:grid;place-items:center;
+}
+.dot::before{
+  content:"";display:block;
+  width:8px;height:8px;border-radius:50%;
   background:#d7dade;
   transition:background .25s, width .25s, border-radius .25s;
 }
-.dot:hover{background:var(--gray-soft)}
-.dot[aria-current="true"]{background:var(--blue);width:24px;border-radius:var(--r-pill)}
-.dot[aria-current="true"]:hover{background:var(--blue)}
+.dot:hover::before{background:var(--gray-soft)}
+.dot[aria-current="true"]::before{background:var(--blue-action);width:24px;border-radius:var(--r-pill)}
+.dot[aria-current="true"]:hover::before{background:var(--blue-action)}
 
 .sr-only{
   position:absolute;width:1px;height:1px;padding:0;margin:-1px;
@@ -708,6 +732,16 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 }
 .marquee:hover .marquee__track,
 .marquee:focus-within .marquee__track{animation-play-state:paused}
+.marquee.is-paused .marquee__track{animation-play-state:paused}
+/* WCAG 2.2.2 wants an explicit control for content that moves for more
+   than five seconds — hover-to-pause does not satisfy it on its own. */
+.marquee-pause{
+  display:flex;align-items:center;justify-content:center;
+  width:28px;height:28px;margin:12px auto 0;
+  border-radius:50%;color:var(--gray-soft);
+  transition:background .2s,color .2s;
+}
+.marquee-pause:hover{background:var(--tint);color:var(--ink)}
 .marquee__list{
   display:flex;gap:0;margin:0;padding:0;list-style:none;
   font-size:.9375rem;color:var(--gray);white-space:nowrap;
@@ -724,6 +758,8 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
   .marquee__track{animation:none;width:auto;flex-wrap:wrap;justify-content:center}
   .marquee__list{flex-wrap:wrap;justify-content:center;white-space:normal;row-gap:6px}
   .marquee__dup{display:none}
+  /* nothing is moving, so the control has nothing to pause */
+  .marquee-pause{display:none}
   /* pictograph fill and bar grow land on their final value with no tween */
   .picto__figures svg.on,.segbar span{transition:none}
 }
@@ -782,7 +818,26 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
   display:flex;align-items:center;justify-content:space-between;
   gap:16px 32px;flex-wrap:wrap;
 }
-.colophon__meta{margin:0;font-size:.8125rem;color:var(--gray-soft)}
+/* full-basis so the two marks share the top row and the attribution gets
+   its own line beneath a hairline, instead of all three competing */
+.colophon__meta{
+  flex-basis:100%;margin:0;padding-top:18px;
+  box-shadow:inset 0 1px 0 var(--hairline);
+  font-size:.8125rem;color:var(--gray-soft);
+}
+/* Official University of Waterloo logo, unaltered. The supplied PNG already
+   contains the mandated clear space, so it only needs uniform scaling.
+   Waterloo brand guidelines require the mark to link to uwaterloo.ca. */
+/* The artwork occupies only 43.5% of the PNG's height — the rest is the
+   mandated clear space baked into the file. So 72px of element height
+   renders ~31px of visible logo, matching the Futures Lab wordmark beside
+   it. Scale this value, never crop the file. */
+.uw-lockup{display:inline-flex;align-items:center;flex:none}
+.uw-lockup img{height:72px;width:auto}
+@media (max-width:640px){
+  .colophon__inner{justify-content:center;text-align:center}
+  .uw-lockup img{height:60px}
+}
 
 /* ============================================================
    SCROLL REVEAL
@@ -810,6 +865,8 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 <!-- ============================================================
      NAV
      ============================================================ -->
+<a class="skip-link" href="#main">Skip to main content</a>
+
 <header class="nav" id="nav">
   <div class="wrap nav__inner">
     <a class="brand" id="navBrand" href="#top">
@@ -832,10 +889,12 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 </header>
 
+<main id="main">
+
 <!-- ============================================================
      HERO
      ============================================================ -->
-<section class="hero" id="top">
+<section class="hero" id="top" aria-labelledby="heroTitle">
   <!-- aura backdrop: four Google-colour blobs, bloom outward on load -->
   <div class="aura-field" data-parallax data-speed="0.10" aria-hidden="true">
     <div class="aura-anchor" style="--x:27%;--y:32%;--s:clamp(340px,62vw,1000px);--bx:110%;--by:55%;animation-delay:80ms">
@@ -854,8 +913,8 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 
   <div class="wrap hero__inner">
     <span class="eyebrow chip-eyebrow reveal">Google × University of Waterloo</span>
-    <h1 class="display hero__headline reveal" style="--delay:90ms">
-      <span class="headline__program">Futures Lab:</span>Agents at Work
+    <h1 class="display hero__headline reveal" id="heroTitle" style="--delay:90ms">
+      <span class="headline__program">Futures Lab:</span> Agents at Work
     </h1>
     <!-- two beats: the provocation, then the offer -->
     <p class="lede hero__sub reveal" style="--delay:180ms">
@@ -952,9 +1011,9 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 <!-- ============================================================
      INTRO — what is this
      ============================================================ -->
-<section class="sec" id="intro">
+<section class="sec" id="intro" aria-labelledby="introTitle">
   <div class="wrap center">
-    <span class="section-label reveal">What is Futures Lab?</span>
+    <h2 class="section-label reveal" id="introTitle">What is Futures Lab?</h2>
     <p class="intro__lead reveal" style="--delay:90ms">
       Futures Lab is an <span class="nowrap">8-week</span>, hands-on workshop at the
       University of Waterloo, run with Google.
@@ -963,7 +1022,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
       It’s built on a simple idea: <strong>anyone can build with AI</strong> — no code or AI
       experience needed, just <em>curiosity</em> and a willingness to <em>break things</em>.
       You’ll work in a small, interdisciplinary team, move fast, test your ideas on real
-      people, and leave with a working AI project on your CV.
+      people and leave with a working AI project on your CV.
     </p>
   </div>
 </section>
@@ -971,12 +1030,12 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 <!-- ============================================================
      BENEFITS / SKILLS GRID
      ============================================================ -->
-<section class="sec" id="benefits">
+<section class="sec" id="benefits" aria-labelledby="benefitsTitle">
   <div class="wrap">
     <div class="center">
       <span class="section-label reveal">Outcomes</span>
       <!-- the heading is the start of a sentence the tiles finish -->
-      <h2 class="h2 measure-sm reveal" style="--delay:80ms">By the end, you’ll be able to:</h2>
+      <h2 class="h2 measure-sm reveal" id="benefitsTitle" style="--delay:80ms">By the end, you’ll be able to:</h2>
     </div>
 
     <div class="grid-tiles">
@@ -1028,8 +1087,8 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
             <path d="M17.6 14.7c1.9.7 3.1 2.5 3.1 4.9"/>
           </svg>
         </div>
-        <h3 class="tile__title">Google mentors</h3>
-        <p class="tile__body">Your team is mentored by people from Google to refine your ideas into a high-impact product.</p>
+        <h3 class="tile__title">Work with Google mentors</h3>
+        <p class="tile__body">Sharpen a rough idea into a high-impact product alongside Googlers who do this for a living.</p>
       </article>
 
       <!-- 05 — compass: choosing a direction under trade-offs -->
@@ -1041,7 +1100,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
           </svg>
         </div>
         <h3 class="tile__title">Design like a PM</h3>
-        <p class="tile__body">Scope real problems, weigh trade-offs, and make key decisions that turn ideas into viable products.</p>
+        <p class="tile__body">Scope real problems, weigh trade-offs and make key decisions that turn ideas into viable products.</p>
       </article>
 
       <!-- 06 — magnifier: watching real people use it -->
@@ -1053,7 +1112,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
           </svg>
         </div>
         <h3 class="tile__title">Test with real users</h3>
-        <p class="tile__body">Run usability tests, gather user feedback, and iterate using proven research loops.</p>
+        <p class="tile__body">Run usability tests, gather user feedback and iterate using proven research loops.</p>
       </article>
 
       <!-- 07 — presentation board: making the case out loud -->
@@ -1066,7 +1125,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
           </svg>
         </div>
         <h3 class="tile__title">Win any room</h3>
-        <p class="tile__body">Pitch your ideas with clarity and confidence to convince teammates, users, and executives alike.</p>
+        <p class="tile__body">Pitch your ideas with clarity and confidence to convince teammates, users and executives alike.</p>
       </article>
     </div>
 
@@ -1079,12 +1138,12 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
      it doesn't complete the "By the end, you'll be able to:" sentence
      the cards finish. Its own section, with a photo carrying the weight.
      ============================================================ -->
-<section class="sec" id="demo-day">
+<section class="sec" id="demo-day" aria-labelledby="demoTitle">
   <div class="wrap">
     <div class="demo reveal">
       <div class="demo__text">
-        <h2 class="h2">Demo day</h2>
-        <p class="lede" style="margin-top:20px">Present your final product to leaders from Google, industry, and NGOs. In past iterations, we’ve hosted it at Google’s Kitchener office.</p>
+        <h2 class="h2" id="demoTitle">Demo day</h2>
+        <p class="lede" style="margin-top:20px">Present your final product to leaders from Google, industry and NGOs. In past iterations, we’ve hosted it at Google’s Kitchener office.</p>
       </div>
       <div class="demo__media">
         <img class="demo__photo" width="1200" height="900" loading="lazy"
@@ -1098,7 +1157,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 <!-- ============================================================
      TESTIMONIALS
      ============================================================ -->
-<section class="sec" id="stories">
+<section class="sec" id="stories" aria-labelledby="storiesTitle">
   <!-- faint accent aura -->
   <div class="aura-field" data-parallax data-speed="0.06" aria-hidden="true">
     <div class="aura-anchor" style="--x:12%;--y:44%;--s:clamp(280px,32vw,520px)">
@@ -1113,7 +1172,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
     <div class="center">
       <span class="section-label reveal">Testimonials</span>
       <!-- DRAFT heading — replace with your own line -->
-      <h2 class="h2 measure-sm reveal" style="--delay:80ms">From students who started exactly where you are</h2>
+      <h2 class="h2 measure-sm reveal" id="storiesTitle" style="--delay:80ms">From students who started exactly where you are</h2>
     </div>
 
     <!-- Quotes are verbatim. Swap each .avatar for
@@ -1174,7 +1233,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 <!-- ============================================================
      METRICS / PROOF
      ============================================================ -->
-<section class="sec" id="metrics">
+<section class="sec" id="metrics" aria-labelledby="metricsTitle">
   <!-- the section was flat white; two faint auras give it the same
        atmosphere as the hero without competing with the data marks -->
   <div class="aura-field" data-parallax data-speed="0.05" aria-hidden="true">
@@ -1189,7 +1248,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
   <div class="wrap">
     <div class="center">
       <span class="section-label reveal">WHO SHOWS UP</span>
-      <h2 class="h2 measure-sm reveal" style="--delay:80ms">Students from everywhere. Building real things.</h2>
+      <h2 class="h2 measure-sm reveal" id="metricsTitle" style="--delay:80ms">Students from everywhere. Building real things.</h2>
     </div>
 
     <!-- (a) pictograph + hero stat -->
@@ -1230,7 +1289,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 
     <!-- (c) who's in the room -->
     <div class="metric-block">
-      <p class="section-label room__label reveal">Every faculty in the room</p>
+      <h3 class="section-label room__label reveal">Every faculty in the room</h3>
 
       <ul class="chips">
           <li class="chip reveal" style="--dot:var(--blue);--delay:0ms">Arts</li>
@@ -1243,7 +1302,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 
       <!-- track holds the list twice so translate(-50%) loops seamlessly;
            the duplicate is aria-hidden so it isn't read out again -->
-      <div class="marquee">
+      <div class="marquee" id="marquee">
         <div class="marquee__track">
           <ul class="marquee__list">
             <li>Horticulture & Landscape Architecture</li>
@@ -1299,6 +1358,12 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
           </ul>
         </div>
       </div>
+      <button class="marquee-pause" type="button" id="marqueePause" aria-pressed="false">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
+          <rect x="4" y="3" width="3" height="10" rx="1"/><rect x="9" y="3" width="3" height="10" rx="1"/>
+        </svg>
+        <span class="sr-only">Pause the scrolling list of programs</span>
+      </button>
       <p class="room__note reveal">…and more — Alumni from +32 programs</p>
 
       <div class="levels reveal" data-grow>
@@ -1325,11 +1390,11 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 <!-- ============================================================
      APPLY
      ============================================================ -->
-<section class="sec" id="apply">
+<section class="sec" id="apply" aria-labelledby="applyTitle">
   <div class="wrap">
     <div class="center">
       <span class="section-label reveal">Apply</span>
-      <h2 class="h2 measure-sm reveal" style="--delay:80ms">Curiosity is the only prerequisite.</h2>
+      <h2 class="h2 measure-sm reveal" id="applyTitle" style="--delay:80ms">Curiosity is the only prerequisite.</h2>
     </div>
 
     <!-- prose explains, the panel is for scanning — people hunting for
@@ -1340,7 +1405,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
         <p class="body">We’re looking for creative, high-agency people who want to build the tools for the future of work and learning — from any program, at any level. <strong>No experience with coding or AI is required — and it won’t give you an advantage, either.</strong> We just want to get to know you.</p>
 
         <h3 class="h3">What the application asks</h3>
-        <p class="body"><strong>Show us your trajectory.</strong> What you're curious about, what you've built or led, the things you throw yourself into. Tell us about your studies, your work or co-op experience, your extracurriculars and hobbies, and take on a few open questions. We're looking for creativity, drive, and proof that you make things happen.</p>
+        <p class="body"><strong>Show us your trajectory.</strong> What you're curious about, what you've built or led, the things you throw yourself into. Tell us about your studies, your work or co-op experience, your extracurriculars and hobbies, and take on a few open questions. We're looking for creativity, drive and proof that you make things happen.</p>
       </div>
 
       <aside class="apply__facts">
@@ -1364,7 +1429,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
       <a class="btn btn--primary btn--lg"
          href="https://docs.google.com/forms/d/e/1FAIpQLSe1zyd8ejtaxyIRl6baYpHAFiZ0aMiMkUVSo8mA4rLaWBKpRQ/viewform"
          target="_blank" rel="noopener noreferrer">
-        Apply for Fall 2026
+        Apply for Fall 2026<span class="sr-only"> (opens in a new tab)</span>
         <svg class="btn__arrow" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -1377,7 +1442,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 <!-- ============================================================
      PARTNER / ORGANIZATION CTA
      ============================================================ -->
-<section class="sec sec--tight" id="partners">
+<section class="sec sec--tight" id="partners" aria-labelledby="partnersTitle">
   <div class="wrap">
     <div class="partner reveal">
       <!-- the contrasting band: all four colours, a touch richer than the
@@ -1399,7 +1464,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 
       <div class="partner__inner">
         <span class="section-label">For universities</span>
-        <h2 class="h2 measure-sm">Bring Futures Lab to your campus</h2>
+        <h2 class="h2 measure-sm" id="partnersTitle">Bring Futures Lab to your campus</h2>
         <p class="lede measure" style="margin-top:18px">
           The University of Waterloo and Google are expanding Futures Lab to institutions
           everywhere. We’re inviting universities to bring the program to their own students.
@@ -1409,7 +1474,7 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
         <a class="btn btn--primary btn--lg" style="margin-top:32px"
            href="https://docs.google.com/forms/d/e/1FAIpQLSeQ2SbzMJsO0DWjIFaJXpo8jrqUZCBWIyBaYOcnNcUggms3vA/viewform"
            target="_blank" rel="noopener noreferrer">
-          Pre-register your institution
+          Pre-register your institution<span class="sr-only"> (opens in a new tab)</span>
           <svg class="btn__arrow" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -1419,6 +1484,8 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- ============================================================
      FOOTER
@@ -1431,6 +1498,10 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
     <a class="brand is-bloomed" href="#top">
       <span class="brand-mark" aria-hidden="true">&gt;<span class="brand-mark__slot"><span class="brand-mark__cursor"></span><svg class="brand-mark__spark" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></span></span>
       Futures Lab
+    </a>
+    <a class="uw-lockup" href="https://uwaterloo.ca" target="_blank" rel="noopener noreferrer">
+      <img src="media/uwaterloo/uw-logo-horiz-colour.png" width="1050" height="421"
+           alt="University of Waterloo (opens in a new tab)">
     </a>
     <p class="colophon__meta">A collaboration between the University of Waterloo and Google · © 2026</p>
   </div>
@@ -1498,6 +1569,24 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
       setActive(current ? current.link : null);
     }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
     spied.forEach(function (o) { spyIO.observe(o.sec); });
+  }
+
+  /* ---- marquee pause (WCAG 2.2.2) ----
+     The list only animates when motion is allowed, so the control is
+     hidden under prefers-reduced-motion and does nothing here. */
+  var marquee = document.getElementById('marquee');
+  var marqueePause = document.getElementById('marqueePause');
+  if (marquee && marqueePause) {
+    var PAUSE_ICON = '<rect x="4" y="3" width="3" height="10" rx="1"/>'
+                   + '<rect x="9" y="3" width="3" height="10" rx="1"/>';
+    var PLAY_ICON  = '<path d="M5 3l8 5-8 5V3Z"/>';
+    marqueePause.addEventListener('click', function () {
+      var paused = marquee.classList.toggle('is-paused');
+      marqueePause.setAttribute('aria-pressed', String(paused));
+      marqueePause.querySelector('svg').innerHTML = paused ? PLAY_ICON : PAUSE_ICON;
+      marqueePause.querySelector('.sr-only').textContent =
+        (paused ? 'Resume' : 'Pause') + ' the scrolling list of programs';
+    });
   }
 
   /* ---- scroll reveals ---- */
