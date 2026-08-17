@@ -814,53 +814,45 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
    COLOPHON
    ============================================================ */
 .colophon{padding-block:clamp(32px,4vw,44px);box-shadow:inset 0 1px 0 var(--hairline)}
-.colophon__inner{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:16px 32px;flex-wrap:wrap;
+.colophon__inner{display:flex;justify-content:center}
+
+/* One centred band, one baseline, three marks at one cap height.
+   No caption: the page already states the relationship three times above,
+   and a footer label listing all three as "partners" would misstate it —
+   Futures Lab is a Waterloo programme, not a third party alongside them. */
+.marks{
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
+  gap:36px;margin:0;padding:0;list-style:none;
 }
-.colophon__meta{margin:0;font-size:.8125rem;color:var(--gray-soft)}
-/* Official University of Waterloo logo, unaltered. The supplied PNG already
-   contains the mandated clear space, so it only needs uniform scaling.
-   Waterloo brand guidelines require the mark to link to uwaterloo.ca. */
-/* Futures Lab anchors left; the two partner marks sit under a label on the
-   right. The label is what lets the marks stand on their own — the sentence
-   that used to sit here just restated the Waterloo logo in words. */
-.colophon__inner{align-items:flex-end}
-.colophon__brand{display:flex;flex-direction:column;gap:14px}
-/* the programme mark anchors the footer, so it sits a step above the nav's
-   size — otherwise the two partner marks outweigh it */
+.marks li{position:relative;display:flex;align-items:center}
+/* the hairline sits in the gap after the programme mark, separating it from
+   the two institutions that run it — the relationship, without a sentence */
+.marks li:first-child::after{
+  content:"";position:absolute;right:-18px;top:50%;
+  transform:translateY(-50%);
+  width:1px;height:30px;background:var(--hairline);
+}
 .colophon .brand{font-size:1.25rem}
 .colophon .brand-mark{font-size:1.625rem}
 
-.partners__label{
-  margin:0 0 12px;
-  font-size:.6875rem;font-weight:500;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--gray-soft);
-}
-.partners__marks{
-  display:flex;align-items:center;gap:26px;
-  margin:0;padding:0;list-style:none;
-}
-/* hairline so the two marks don't read as a single lockup */
-.partners__marks li + li{padding-left:26px;box-shadow:inset 1px 0 0 var(--hairline)}
-
 /* Only 43.5% of the Waterloo PNG is artwork — the rest is the clear space
-   mandated by their guidelines and baked into the file. 72px of element
-   height renders ~31px of visible mark; the negative margin gives the unused
-   clear space back to the layout without cropping the file. */
+   mandated by their guidelines and baked into the file. 70px of element
+   height renders ~30px of visible mark; the negative margin gives the unused
+   clear space back to the layout without ever cropping the file. */
 .uw-lockup{display:flex;align-items:center}
-.uw-lockup img{height:72px;width:auto;margin:-21px 0}
+.uw-lockup img{height:70px;width:auto;margin:-20px 0}
 
-/* A single-line wordmark against a two-line lockup: matching their boxes
-   would make Google read oversized, so it is matched on cap height instead —
-   the G lines up with WATERLOO. */
+/* Matched to the others on CAP HEIGHT, not bounding box. Google's wordmark
+   is one line against Waterloo's two, so equal boxes read as unequal marks;
+   at 24px the G lines up with WATERLOO and Futures Lab. */
 .g-lockup{display:flex;align-items:center}
-.g-lockup img{height:22px;width:auto}
+.g-lockup img{height:24px;width:auto}
 
 @media (max-width:720px){
-  .colophon__inner{align-items:flex-start;gap:32px}
-  .partners__marks{gap:20px}
-  .partners__marks li + li{padding-left:20px}
+  /* programme mark takes its own line above the two institutional marks */
+  .marks{gap:26px}
+  .marks li:first-child{flex-basis:100%;justify-content:center;margin-bottom:4px}
+  .marks li:first-child::after{display:none}
 }
 
 /* ============================================================
@@ -1519,32 +1511,27 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
      the two partner marks. -->
 <footer class="colophon">
   <div class="wrap colophon__inner">
-    <!-- rest state from the start — the bloom gesture plays once, in the nav -->
-    <div class="colophon__brand">
-      <a class="brand is-bloomed" href="#top">
-        <span class="brand-mark" aria-hidden="true">&gt;<span class="brand-mark__slot"><span class="brand-mark__cursor"></span><svg class="brand-mark__spark" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></span></span>
-        Futures Lab
-      </a>
-      <p class="colophon__meta">© 2026 Futures Lab</p>
-    </div>
-
-    <div class="partners">
-      <p class="partners__label" id="partnersLabel">In partnership with</p>
-      <ul class="partners__marks" aria-labelledby="partnersLabel">
-        <li>
-          <a class="uw-lockup" href="https://uwaterloo.ca" target="_blank" rel="noopener noreferrer">
-            <img src="media/uwaterloo/uw-logo-horiz-colour.png" width="1050" height="421"
-                 alt="University of Waterloo (opens in a new tab)">
-          </a>
-        </li>
-        <li>
-          <a class="g-lockup" href="https://google.com" target="_blank" rel="noopener noreferrer">
-            <img src="media/google/google-wordmark.svg" width="272" height="92"
-                 alt="Google (opens in a new tab)">
-          </a>
-        </li>
-      </ul>
-    </div>
+    <ul class="marks">
+      <!-- rest state from the start — the bloom gesture plays once, in the nav -->
+      <li>
+        <a class="brand is-bloomed" href="#top">
+          <span class="brand-mark" aria-hidden="true">&gt;<span class="brand-mark__slot"><span class="brand-mark__cursor"></span><svg class="brand-mark__spark" viewBox="-50 -50 100 100"><path d="M0 0 L0 -46 Q0 0 46 0 Z" fill="#4285F4"/><path d="M0 0 L46 0 Q0 0 0 46 Z" fill="#EA4335"/><path d="M0 0 L0 46 Q0 0 -46 0 Z" fill="#FBBC05"/><path d="M0 0 L-46 0 Q0 0 0 -46 Z" fill="#34A853"/></svg></span></span>
+          Futures Lab
+        </a>
+      </li>
+      <li>
+        <a class="uw-lockup" href="https://uwaterloo.ca" target="_blank" rel="noopener noreferrer">
+          <img src="media/uwaterloo/uw-logo-horiz-colour.png" width="1050" height="421"
+               alt="University of Waterloo (opens in a new tab)">
+        </a>
+      </li>
+      <li>
+        <a class="g-lockup" href="https://google.com" target="_blank" rel="noopener noreferrer">
+          <img src="media/google/google-wordmark.svg" width="272" height="92"
+               alt="Google (opens in a new tab)">
+        </a>
+      </li>
+    </ul>
   </div>
 </footer>
 
