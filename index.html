@@ -609,6 +609,15 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
 /* ============================================================
    APPLY
    ============================================================ */
+.apply__availability{margin:16px 0 0;font-size:1.125rem;font-weight:500;color:var(--gray)}
+.apply-update{
+  max-width:880px;margin:32px auto 0;
+  padding:clamp(22px,3vw,30px);
+  background:#f3f7fe;border-radius:var(--r-md);
+}
+.apply-update__title{margin:0;font-size:1.125rem;line-height:1.4;font-weight:500;color:var(--ink)}
+.apply-update p{margin:10px 0 0;font-size:1rem;line-height:1.65;color:var(--gray)}
+.apply-update p + p{margin-top:12px}
 .apply{
   display:grid;gap:clamp(28px,4vw,48px);
   margin-top:clamp(40px,5vw,60px);
@@ -1411,14 +1420,21 @@ button.quote__project:hover{background:#eef0f2;color:var(--ink);transform:transl
     <div class="center">
       <span class="section-label reveal">Apply</span>
       <h2 class="h2 measure-sm reveal" id="applyTitle" style="--delay:80ms">Curiosity is the only prerequisite.</h2>
+      <p class="apply__availability reveal" style="--delay:120ms">Spots are limited.</p>
     </div>
+
+    <aside class="apply-update reveal" aria-labelledby="applyUpdateTitle">
+      <h3 class="apply-update__title" id="applyUpdateTitle">Fall 2026 update</h3>
+      <p>We received applications from <strong>over 400 talented people</strong> this fall. We keep Futures Lab intentionally small so everyone can participate actively and collaborate closely.</p>
+      <p>If we couldn’t offer you a spot this time, we’d love for you to apply again. Applications for <strong>Winter 2027</strong> open at the end of this term.</p>
+    </aside>
 
     <!-- prose explains, the panel is for scanning — people hunting for
          dates and cost shouldn't have to read paragraphs to find them -->
     <div class="apply reveal">
       <div class="apply__prose">
         <h3 class="h3">Who we’re looking for</h3>
-        <p class="body">We’re looking for creative, high-agency people who want to build the tools for the future of work and learning — from any program, at any level. <strong>No experience with coding or AI is required — and it won’t give you an advantage, either.</strong> We just want to get to know you.</p>
+        <p class="body">We’re looking for <strong>60</strong> creative, high-agency people who want to build the tools for the future of work and learning — from any program, at any level. <strong>No experience with coding or AI is required — and it won’t give you an advantage, either.</strong> We just want to get to know you.</p>
 
         <h3 class="h3">What the application asks</h3>
         <p class="body"><strong>Show us your trajectory.</strong> What you're curious about, what you've built or led, the things you throw yourself into. Tell us about your studies, your work or co-op experience, your extracurriculars and hobbies, and take on a few open questions. We're looking for creativity, drive and proof that you make things happen.</p>
